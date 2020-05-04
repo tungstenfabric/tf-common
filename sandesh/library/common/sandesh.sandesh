@@ -1,0 +1,115 @@
+/*
+ * Copyright (c) 2013 Juniper Networks, Inc. All rights reserved.
+ */
+
+/*
+ *  sandesh.sandesh
+ *
+ *  Sandesh definitions
+ */
+
+enum SandeshType {
+    INVALID = 0,
+    SYSTEM = 1,
+    REQUEST = 2,
+    RESPONSE = 3,
+    TRACE = 4,
+    BUFFER = 5,
+    UVE = 6,
+    OBJECT = 7,
+    FLOW = 8,
+    TRACE_OBJECT = 9,
+    SYSLOG = 10,
+    ALARM = 11,
+    SESSION = 12
+}
+
+enum SandeshLevel {
+    /*
+     * Syslog severity levels
+     */
+    SYS_UVE = -100,
+    SYS_EMERG = 0,
+    SYS_ALERT = 1,
+    SYS_CRIT = 2,
+    SYS_ERR = 3,
+    SYS_WARN = 4,
+    SYS_NOTICE = 5,
+    SYS_INFO = 6,
+    SYS_DEBUG = 7,
+    /*
+     * User defined levels
+     */
+    /*
+     * Unit test levels
+     */
+     UT_START = 200,
+     UT_EMERG = 200,
+     UT_ALERT = 201,
+     UT_CRIT = 202,
+     UT_ERR = 203,
+     UT_WARN = 204,
+     UT_NOTICE = 205,
+     UT_INFO = 206,
+     UT_DEBUG = 207,
+     UT_END = 207,
+     /*
+      * Invalid
+      */
+      INVALID = 0x7fffffff
+}
+
+enum SandeshTxDropReason {
+    MinDropReason = 0,
+    NoDrop,
+    RatelimitDrop,
+    ValidationFailed,
+    QueueLevel,
+    NoClient,
+    NoSession,
+    NoQueue,
+    ClientSendFailed,
+    HeaderWriteFailed,
+    WriteFailed,
+    SessionNotConnected,
+    WrongClientSMState,
+    SendingDisabled,
+    SendingToSyslog,
+    MaxDropReason
+}
+
+enum SandeshRxDropReason {
+    MinDropReason = 0,
+    NoDrop,
+    QueueLevel,
+    NoQueue,
+    ControlMsgFailed,
+    CreateFailed,
+    DecodingFailed,
+    MaxDropReason
+}
+
+const i32 SANDESH_KEY_HINT = 0x1
+const i32 SANDESH_CONTROL_HINT = 0x2
+const i32 SANDESH_SYNC_HINT = 0x4
+const u32 DEFAULT_SANDESH_SEND_RATELIMIT = 0
+
+// Update ParseHeader function in sandesh_message_builder.cc
+// when modifying SandeshHeader below
+struct SandeshHeader {
+    1: string Namespace;
+    2: i64 Timestamp;
+    3: string Module;
+    4: string Source;
+    5: string Context;
+    6: i32 SequenceNum;
+    7: i32 VersionSig;
+    8: SandeshType Type;
+    9: i32 Hints;
+    10: i32 Level;
+    11: string Category;
+    12: string NodeType;
+    13: string InstanceId;
+    14: optional string IPAddress;
+    15: optional i32 Pid;
+}

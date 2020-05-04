@@ -1,0 +1,80 @@
+/*
+ * Copyright (c) 2015 Juniper Networks, Inc. All rights reserved.
+ */
+
+/*
+ *  sandesh_alarm_base.sandesh
+ *
+ */
+
+
+union AlarmOperand2 {
+    1: optional string uve_attribute
+    2: optional string json_value
+}
+
+struct AlarmCondition {
+    1: string operation
+    2: string operand1
+    3: AlarmOperand2 operand2
+    4: optional list<string> variables
+}
+
+struct AlarmMatch {
+    1: string json_operand1_value
+    2: optional string json_operand2_value
+    3: optional map<string, string> json_variables
+}
+
+struct AlarmConditionMatch {
+    1: AlarmCondition condition
+    2: list<AlarmMatch> match
+}
+
+struct AlarmAndList {
+    1: list<AlarmConditionMatch> and_list
+}
+
+struct AlarmRules {
+    1: list<AlarmAndList> or_list
+}
+
+/**
+ * UVEAlarmInfo is used to report any Alarm
+ * It contains:
+ *     - Alarm Type
+ *     - A description of why the alarm was raised.
+ *       This corresponds to an OR of ANDs of the
+ *       AlarmElements of individual AlarmTemplates
+ *     - Whether the alarm has been acknowledged yet
+ *     - Timestamp
+ *     - Severity
+ *     - token used when calling the Acknowledgement API
+ */
+struct UVEAlarmInfo {
+    1: string type
+    2: AlarmRules alarm_rules
+    3: bool ack
+    4: u64 timestamp
+    5: byte severity
+    6: string token
+   11: string description
+}
+
+struct UVEAlarmConfig {
+    1: u32  ActiveTimer
+    2: u32  IdleTimer
+    3: bool FreqExceededCheck
+    4: u16  FreqCheck_Times
+    5: u16  FreqCheck_Seconds
+}
+
+struct UVEAlarms {
+    1: string name (key="none")
+    2: list<UVEAlarmInfo> alarms (aggtype="union")
+    3: optional bool deleted
+}
+
+alarm sandesh AlarmTrace {
+    1: UVEAlarms data
+}

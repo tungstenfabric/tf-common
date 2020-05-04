@@ -1,0 +1,31 @@
+#
+# Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
+#
+
+Import('DbEnv')
+EqlIfEnv = DbEnv.Clone()
+
+EqlIfEnv.Append(CPPPATH = ['/usr/include'])
+EqlIfEnv.Append(CPPPATH = [EqlIfEnv['TOP'] + '/grpc'])
+EqlIfEnv.Append(CPPPATH = [EqlIfEnv['TOP'] + '/database/etcd'])
+
+#EqlIfEnv.Append(LIBPATH=['#build/lib'])
+
+local_srcs = ['eql_if.cc',
+              'proto/auth.pb.cc',
+              'proto/kv.pb.cc',
+              'proto/rpc.pb.cc',
+              'proto/rpc.grpc.pb.cc']
+
+EqlIfEnv.Append(CXXFLAGS = '-Wall -std=c++11')
+#EqlIfEnv.Append(LDFLAGS = 'pkg-config --libs protobuf grpc++ grpc')
+
+gen_files = EqlIfEnv.SandeshGenCpp('eql.sandesh')
+gen_srcs = EqlIfEnv.ExtractCpp(gen_files)
+
+srcs = local_srcs + gen_srcs
+
+libetcdql = EqlIfEnv.Library('etcdql', srcs)
+EqlIfEnv.Install(EqlIfEnv['TOP_LIB'], libetcdql)
+
+EqlIfEnv.SConscript('test/SConscript', exports='EqlIfEnv', duplicate=0)

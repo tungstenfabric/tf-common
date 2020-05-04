@@ -1,0 +1,15 @@
+# -*- mode: python; -*-
+
+#
+# Copyright (c) 2013 Juniper Networks, Inc. All rights reserved.
+#
+
+Import('SandeshEnv');
+
+env = SandeshEnv.Clone()
+
+env.Alias('install', env.InstallAs(
+    env['INSTALL_DOC'] + '/contrail-docs/html/messages/doc-style.css',
+    'webs/css/doc-style.css'))
+
+SConscript('test/SConscript', exports='SandeshEnv', duplicate = 0)

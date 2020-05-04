@@ -1,0 +1,170 @@
+#
+# Copyright (c) 2013 Juniper Networks, Inc. All rights reserved.
+#
+
+# -*- mode: python; -*-
+
+Import('BuildEnv')
+import sys
+env = BuildEnv.Clone()
+
+env.Append(CPPPATH = [env['TOP'], env['TOP'] + '/base/sandesh'])
+env.Append(LIBPATH = env['TOP'] + '/base')
+env.Append(LIBPATH = env['TOP'] + '/base/test')
+env.Append(LIBPATH = env['TOP'] + '/io')
+
+env.Prepend(LIBS = ['base', 'gunit', 'task_test', 'io', 'sandesh', 'sandeshvns',
+                    'nodeinfo', 'process_info', 'cpuinfo', 'base', 'ssl', 'http',
+                    'io', 'crypto', 'http_parser', 'curl', 'pugixml', 'boost_program_options'])
+
+if sys.platform not in ['darwin']:
+    env.Append(LIBS = ['rt'])
+
+libtask_test = env.Library('task_test',
+                           ['task_test_util.cc',
+                            'addr_test_util.cc'])
+env.Alias('base:libtask_test', libtask_test)
+
+address_test = env.UnitTest('address_test', ['address_test.cc'])
+env.Alias('base:address_test', address_test)
+
+address_util_test = env.UnitTest('address_util_test', ['address_util_test.cc'])
+env.Alias('base:address_util_test', address_util_test)
+
+bitset_test = env.UnitTest('bitset_test', ['bitset_test.cc'])
+env.Alias('base:bitset_test', bitset_test)
+
+index_allocator_test = env.UnitTest('index_allocator_test', ['index_allocator_test.cc'])
+env.Alias('base:index_allocator_test', index_allocator_test)
+
+indexmap_test = env.UnitTest('indexmap_test', ['index_map_test.cc'])
+env.Alias('base:indexmap_test', indexmap_test)
+
+dependency_test = env.UnitTest('dependency_test', ['dependency_test.cc'])
+env.Alias('base:dependency_test', dependency_test)
+
+label_block_test = env.UnitTest('label_block_test', ['label_block_test.cc'])
+env.Alias('base:label_block_test', label_block_test)
+
+queue_task_test = env.UnitTest('queue_task_test', ['queue_task_test.cc'])
+env.Alias('base:queue_task_test', queue_task_test)
+
+proto_test = env.UnitTest('proto_test', ['proto_test.cc'])
+env.Alias('base:proto_test', proto_test)
+
+subset_test = env.UnitTest('subset_test', ['subset_test.cc'])
+env.Alias('base:subset_test', subset_test)
+
+task_test = env.UnitTest('task_test', ['task_test.cc'])
+env.Alias('base:task_test', task_test)
+
+timer_test = env.UnitTest('timer_test', ['timer_test.cc'])
+env.Alias('base:timer_test', timer_test)
+
+patricia_test = env.UnitTest('patricia_test', ['patricia_test.cc'])
+env.Alias('base:patricia_test', patricia_test)
+
+boost_US_test = env.UnitTest('boost_US_test', ['boost_unordered_set_test.cc'])
+env.Alias('base:boost_US_test', boost_US_test)
+
+conn_info_test = env.UnitTest('conn_info_test',
+                               ['connection_info_test.cc']
+                              )
+env.Alias('base:conn_info_test', conn_info_test)
+
+def AddLibraries(env, libs):
+    for lib in libs:
+        components =  lib.rsplit('/', 1)
+        if len(components) > 1:
+            env.Append(LIBPATH = env['TOP'] + '/' + components[0])
+            components.pop(0)
+        env.Append(LIBS = components[0])
+
+def BuildTest(env, testname, sources, libs):
+    build_env = env.Clone()
+    AddLibraries(build_env, libs)
+    target = build_env.UnitTest(testname, sources)
+    env.Alias('base:' + testname, target)
+    return target
+
+task_annotations_test = BuildTest(env, 'task_annotations_test',
+     ['task_annotations_test.cc'],
+     ['base/test/task_test',
+      'io/io',
+      'boost_system'])
+
+factory_test = BuildTest(env, 'factory_test',
+          ['factory_test.cc'], [])
+
+trace_test = BuildTest(env, 'trace_test',
+          ['trace_test.cc'], [])
+
+util_test = BuildTest(env, 'util_test',
+          ['util_test.cc'], [])
+
+test_task_monitor = env.UnitTest('test_task_monitor', ['test_task_monitor.cc'])
+env.Alias('base:test_task_monitor', test_task_monitor)
+
+test_suite = [
+    address_test,
+    address_util_test,
+    bitset_test,
+    index_allocator_test,
+    indexmap_test,
+    dependency_test,
+    label_block_test,
+    subset_test,
+    patricia_test,
+    boost_US_test,
+    task_annotations_test,
+    factory_test,
+    trace_test,
+    test_task_monitor,
+    queue_task_test,
+    conn_info_test,
+    ]
+
+#Required by base:test
+#controller/src/bgp
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/bgp', '#controller/src/bgp/bgp_attr.h')
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/bgp', '#controller/src/bgp/bgp_aspath.h')
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/bgp', '#controller/src/bgp/bgp_attr_base.h')
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/bgp', '#controller/src/bgp/bgp_common.h')
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/bgp', '#controller/src/bgp/bgp_origin_vn_path.h')
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/bgp', '#controller/src/bgp/community.h')
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/bgp', '#controller/src/bgp/bgp_route.h')
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/bgp', '#controller/src/bgp/bgp_path.h')
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/bgp/extended-community', '#controller/src/bgp/extended-community/types.h')
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/bgp/inet', '#controller/src/bgp/inet/inet_route.h')
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/bgp/l3vpn', '#controller/src/bgp/l3vpn/inetvpn_address.h')
+#controller/src/net
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/net', '#controller/src/net/esi.h')
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/net', '#controller/src/net/mac_address.h')
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/net', '#controller/src/net/rd.h')
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/net', '#controller/src/net/bgp_af.h')
+#controller/src/route
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/route', '#controller/src/route/path.h')
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/route', '#controller/src/route/route.h')
+#controller/src/db
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/db', '#controller/src/db/db_table.h')
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/db', '#controller/src/db/db_entry.h')
+
+env.Install(env['TOP_LIB'], libtask_test)
+
+test = env.TestSuite('base-test', test_suite)
+env.Alias('src/contrail-common/base:test', test)
+
+flaky_test_suite = [
+    proto_test,
+#   task_test,
+    timer_test,
+    util_test,
+]
+
+flaky_test = env.TestSuite('base-flaky-test', flaky_test_suite)
+env.Alias('src/contrail-common/base:flaky-test', flaky_test)
+
+
+
+Return('test_suite')
+

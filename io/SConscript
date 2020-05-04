@@ -1,0 +1,55 @@
+#
+# Copyright (c) 2013 Juniper Networks, Inc. All rights reserved.
+#
+
+# -*- mode: python; -*-
+import platform
+Import('BuildEnv')
+
+env = BuildEnv.Clone()
+env.CppDisableExceptions()
+env.Append(CPPPATH = [env['TOP']])
+
+SandeshGenFiles = env.SandeshGenCpp('io.sandesh')
+SandeshGenSrcs = env.ExtractCpp(SandeshGenFiles)
+
+except_env = BuildEnv.Clone()
+except_env.Append(CPPPATH = env['TOP_INCLUDE'] + '/thrift')
+except_env.Append(CPPPATH = [env['TOP']])
+EventManagerSrc = except_env.Object('event_manager.cc')
+SslServerSrc = except_env.Object('ssl_server.cc')
+
+usock_env = BuildEnv.Clone()
+usock_env.CppEnableExceptions()
+usock_env.Append(CPPPATH = env['TOP'])
+usock_server = usock_env.Object('usock_server.cc')
+
+IoSrc = [
+    'io_utils.cc',
+    'ssl_session.cc',
+    'tcp_message_write.cc',
+    'tcp_server.cc',
+    'tcp_session.cc',
+    'udp_server.cc',
+    'process_signal_common.cc',
+]
+
+IoSrc += [
+    'nix/process_signal.cc',
+    usock_server,
+]
+
+# IO
+contrail_common_io_doc_files = []
+io_doc_target = BuildEnv['TOP'] + '/io/'
+contrail_common_io_doc_files += BuildEnv.SandeshGenDoc('#src/contrail-common/io/io.sandesh', io_doc_target)
+env['IO_DOC_FILES'] = contrail_common_io_doc_files
+Export('contrail_common_io_doc_files')
+
+libio = env.Library('io',
+            SandeshGenSrcs +
+            EventManagerSrc +
+            SslServerSrc +
+            IoSrc)
+env.Install(env['TOP_LIB'], libio)
+env.SConscript('test/SConscript', exports='BuildEnv', duplicate = 0)

@@ -1,0 +1,136 @@
+# -*- mode: python; -*-
+
+#
+# Copyright (c) 2013 Juniper Networks, Inc. All rights reserved.
+#
+
+Import('SandeshEnv')
+import sys
+
+env = SandeshEnv.Clone()
+
+env.Append(CPPPATH = [
+    Dir('.').abspath,
+    Dir('#build/include').abspath,
+    Dir('#build/include/libxml2').abspath,
+    Dir('#src/contrail-common').abspath,
+    '../',
+    '../../common/test/',
+    '../../common/',
+    env['TOP'] + '/io',
+    '/usr/include/libxml2',
+])
+
+# Generate the source files
+SandeshRWTestGenFiles = env.SandeshGenCpp('sandesh_rw_test.sandesh')
+SandeshMessageTestGenFiles = env.SandeshGenCpp('sandesh_message_test.sandesh')
+SandeshTraceTestGenFiles = env.SandeshGenCpp('sandesh_trace_test.sandesh')
+SandeshHttpTestGenFiles = env.SandeshGenCpp('sandesh_http_test.sandesh')
+SandeshPerfTestGenFiles = env.SandeshGenCpp('sandesh_perf_test.sandesh')
+SandeshSendQueueTestGenFiles = env.SandeshGenCpp('sandesh_send_queue_test.sandesh')
+
+SandeshRWTestGenSrcs = env.ExtractCpp(SandeshRWTestGenFiles)
+SandeshMessageTestGenSrcs = env.ExtractCpp(SandeshMessageTestGenFiles)
+SandeshTraceTestGenSrcs = env.ExtractCpp(SandeshTraceTestGenFiles)
+SandeshTraceTestGenObjs = env.Object(SandeshTraceTestGenSrcs)
+SandeshHttpTestGenSrcs = env.ExtractCpp(SandeshHttpTestGenFiles)
+SandeshPerfTestGenSrcs = env.ExtractCpp(SandeshPerfTestGenFiles)
+SandeshSendQueueTestGenSrcs = env.ExtractCpp(SandeshSendQueueTestGenFiles)
+
+SandeshLibPath = [
+    '#/build/lib',
+    Dir(env['TOP']).abspath + '/base',
+    Dir(env['TOP']).abspath + '/base/test',
+    Dir(env['TOP']).abspath + '/io',
+]
+
+SandeshLibs = [
+    'gunit',
+    'sandesh',
+    'http',
+    'http_parser',
+    'curl',
+    'io',
+    'sandeshvns',
+    'process_info',
+    'boost_regex',
+    'boost_system',
+    'boost_date_time',
+    'boost_thread',
+    'xml2',
+    'task_test',
+    'pugixml',
+    'ssl',
+    'crypto',
+    'base',
+    'log4cplus',
+]
+
+SandeshLibs.extend([
+    'pthread',
+    'xslt',
+])
+
+if env.UseSystemTBB():
+    SandeshLibs.append('tbb')
+else:
+    SandeshLibs.append('tbb_debug')
+
+env.Append(LIBPATH = SandeshLibPath)
+
+if env['OPT'] == 'coverage':
+    env.Prepend(LIBS = 'gcov')
+
+env.Prepend(LIBS = SandeshLibs)
+
+if sys.platform not in ['darwin']:
+    env.Append(LIBS = ['rt'])
+
+if sys.platform.startswith('freebsd'):
+    env.Append(LIBS = ['z', 'lzma', 'iconv'])
+
+def define_unit_test(name, sources):
+    sandesh_test = env.UnitTest(
+        'sandesh_{}_test'.format(name),
+        sources + ['sandesh_{}_test.cc'.format(name)])
+    env.Alias('src/sandesh:sandesh_{}_test'.format(name), sandesh_test)
+    return sandesh_test
+
+
+sandesh_send_queue_test = define_unit_test('send_queue', [SandeshSendQueueTestGenSrcs])
+sandesh_perf_test = define_unit_test('perf', [SandeshPerfTestGenSrcs])
+sandesh_session_test = define_unit_test('session', [])
+sandesh_rw_test = define_unit_test('rw', [SandeshRWTestGenSrcs])
+sandesh_message_test = define_unit_test('message', [SandeshMessageTestGenSrcs, env['SandeshBufferTestGenCppObjs']])
+sandesh_trace_test = define_unit_test('trace', [SandeshTraceTestGenObjs])
+sandesh_show_trace_test = define_unit_test('show_trace', [SandeshTraceTestGenObjs])
+sandesh_http_test = define_unit_test('http', [SandeshHttpTestGenSrcs])
+
+env.Requires(sandesh_http_test, '#/build/include/libxml2/libxml/tree.h')
+
+sandesh_test_common_obj = env.Object('sandesh_test_common.cc')
+
+sandesh_state_machine_test = define_unit_test('state_machine', [sandesh_test_common_obj])
+sandesh_client_test = define_unit_test('client', [sandesh_test_common_obj])
+sandesh_statistics_test = define_unit_test('statistics', [])
+sandesh_request_test = define_unit_test('request', [sandesh_test_common_obj])
+
+
+test_suite = [
+    #sandesh_message_test,
+    sandesh_rw_test,
+    sandesh_session_test,
+    sandesh_trace_test,
+    sandesh_http_test,
+    sandesh_state_machine_test,
+    sandesh_perf_test,
+    sandesh_client_test,
+    sandesh_statistics_test,
+    sandesh_request_test,
+    sandesh_send_queue_test,
+]
+
+test = env.TestSuite('sandesh-test', test_suite)
+env.Alias('sandesh:cpp_test', test)
+
+Return('test_suite')

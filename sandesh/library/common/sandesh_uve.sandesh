@@ -1,0 +1,355 @@
+/*
+ * Copyright (c) 2013 Juniper Networks, Inc. All rights reserved.
+ */
+
+/*
+ *  sandesh_uve.sandesh
+ *
+ *  Sandesh Library definitions
+ */
+
+include "io/io.sandesh"
+include "sandesh/library/common/derived_stats_results.sandesh"
+
+struct SandeshMessageStats {
+    1: optional u64 messages_sent;
+    2: optional u64 bytes_sent;
+    3: optional u64 messages_received;
+    4: optional u64 bytes_received;
+    5: optional u64 messages_sent_dropped;
+    6: optional u64 bytes_sent_dropped;
+    7: optional u64 messages_received_dropped;
+    8: optional u64 bytes_received_dropped;
+    // Send
+    // Messages
+    51: optional u64 messages_sent_dropped_no_queue;
+    52: optional u64 messages_sent_dropped_no_client;
+    53: optional u64 messages_sent_dropped_no_session;
+    54: optional u64 messages_sent_dropped_queue_level;
+    55: optional u64 messages_sent_dropped_client_send_failed;
+    56: optional u64 messages_sent_dropped_session_not_connected;
+    57: optional u64 messages_sent_dropped_header_write_failed;
+    58: optional u64 messages_sent_dropped_write_failed;
+    59: optional u64 messages_sent_dropped_wrong_client_sm_state;
+    60: optional u64 messages_sent_dropped_validation_failed;
+    61: optional u64 messages_sent_dropped_rate_limited;
+    62: optional u64 messages_sent_dropped_sending_disabled;
+    63: optional u64 messages_sent_dropped_sending_to_syslog;
+    // Bytes
+    81: optional u64 bytes_sent_dropped_no_queue;
+    82: optional u64 bytes_sent_dropped_no_client;
+    83: optional u64 bytes_sent_dropped_no_session;
+    84: optional u64 bytes_sent_dropped_queue_level;
+    85: optional u64 bytes_sent_dropped_client_send_failed;
+    86: optional u64 bytes_sent_dropped_session_not_connected;
+    87: optional u64 bytes_sent_dropped_header_write_failed;
+    88: optional u64 bytes_sent_dropped_write_failed;
+    89: optional u64 bytes_sent_dropped_wrong_client_sm_state;
+    90: optional u64 bytes_sent_dropped_validation_failed;
+    91: optional u64 bytes_sent_dropped_rate_limited;
+    92: optional u64 bytes_sent_dropped_sending_disabled;
+    93: optional u64 bytes_sent_dropped_sending_to_syslog;
+    // Receive
+    // Messages
+    101: optional u64 messages_received_dropped_no_queue;
+    102: optional u64 messages_received_dropped_queue_level;
+    103: optional u64 messages_received_dropped_create_failed;
+    104: optional u64 messages_received_dropped_control_msg_failed;
+    105: optional u64 messages_received_dropped_decoding_failed;
+    // Bytes
+    131: optional u64 bytes_received_dropped_no_queue;
+    132: optional u64 bytes_received_dropped_queue_level;
+    133: optional u64 bytes_received_dropped_create_failed;
+    134: optional u64 bytes_received_dropped_control_msg_failed;
+    135: optional u64 bytes_received_dropped_decoding_failed;
+}
+
+struct SandeshMessageBasicStats {
+    1: u64 messages_sent;
+    2: u64 bytes_sent;
+    3: u64 messages_received;
+    4: u64 bytes_received;
+    5: u64 messages_sent_dropped;
+    6: u64 messages_received_dropped;
+}
+
+struct SandeshMessageTypeBasicStats {
+    1: string message_type;
+    2: SandeshMessageBasicStats stats;
+}
+
+struct SandeshMessageTypeStats {
+    1: string message_type;
+    2: SandeshMessageStats stats;
+}
+
+struct SandeshQueueStats {
+    1: u64 enqueues;
+    2: u64 count;
+    3: u64 max_count;
+}
+
+struct SandeshGeneratorStats {
+    1: list<SandeshMessageTypeStats> type_stats;
+    2: SandeshMessageStats aggregate_stats;
+}
+
+struct SandeshGeneratorBasicStats {
+    1: list<SandeshMessageTypeBasicStats> type_stats;
+    2: SandeshMessageBasicStats aggregate_stats;
+}
+
+/**
+ * @description: sandesh request to get sandesh message statistics
+ * @cli_name: read sandesh message statistics
+ */
+request sandesh SandeshMessageStatsReq {
+}
+
+response sandesh SandeshMessageStatsResp {
+    1: SandeshGeneratorStats stats;
+    2: SandeshQueueStats send_queue_stats;
+    3: string sending_level;
+    4: u64 session_close_interval_msec;
+    5: u64 session_close_timestamp;
+}
+
+/**
+ * @description: sandesh request to set sandesh logging parameters
+ * @cli_name: update sandesh logging parameters
+ */
+request sandesh SandeshLoggingParamsSet {
+    /** enable or disable logging */
+    1: optional bool enable;
+    /** category of messages to be considered for logging  */
+    2: optional string category;
+    /** minimum level of messages to be considered for logging  */
+    3: optional string log_level;
+    /** enable or disable trace print */
+    4: optional bool trace_print;
+    /** enable or disable flow logging */
+    5: optional bool enable_flow_log;
+}
+
+/**
+ * @description: sandesh request to get sandesh logging parameters
+ * @cli_name: read sandesh logging parameters
+ */
+request sandesh SandeshLoggingParamsStatus {
+}
+
+response sandesh SandeshLoggingParams {
+    1: bool enable;
+    2: string category;
+    3: string log_level;
+    4: bool trace_print;
+    5: bool enable_flow_log;
+}
+
+/**
+ * @description: Request to set sandesh sending parameters
+ * @cli_name: update sandesh sending parameters
+ */
+request sandesh SandeshSendingParamsSet {
+    /** rate limit for sending of system logs in messages per second per message type */
+    1: optional u32 system_logs_rate_limit;
+    /** disable sending of object logs to collector */
+    2: optional bool disable_object_logs;
+    /** disable sending of all messages to collector */
+    3: optional bool disable_all_logs;
+    /** disable sending of all flows to collector */
+    4: optional bool disable_flows;
+}
+
+/**
+ * @description: Request to get sandesh sending parameters
+ * @cli_name: read sandesh sending parameters
+ */
+request sandesh SandeshSendingParamsStatus {
+}
+
+response sandesh SandeshSendingParams {
+    1: u32 system_logs_rate_limit;
+    2: bool disable_object_logs;
+    3: bool disable_all_logs;
+    4: optional u16 dscp;
+    5: optional bool disable_flows;
+}
+
+/**
+ * @description: sandesh request to set sandesh send queue parameters
+ * @cli_name: create sandesh send queue parameters
+ */
+request sandesh SandeshSendQueueParamsSet {
+    /** for high watermark or low watermark */
+    1: optional bool high;
+    /** queue count for this level */
+    2: optional u32 queue_count;
+    /** highest message level for this watermark */
+    3: optional string sending_level;
+}
+
+/**
+ * @description: sandesh request to reset sandesh send queue parameters
+ * @cli_name: update sandesh send queue parameters
+ */
+request sandesh SandeshSendQueueParamsReset {
+}
+
+/**
+ * @description: sandesh request to get sandesh send queue parameters
+ * @cli_name: read sandesh send queue parameters
+ */
+request sandesh SandeshSendQueueParamsStatus {
+}
+
+struct SandeshSendQueueParams {
+    1: bool high;
+    2: u32 queue_count;
+    3: string sending_level;
+}
+
+response sandesh SandeshSendQueueParamsResponse {
+    1: list<SandeshSendQueueParams> info;
+}
+
+/**
+ * @description: sandesh request to set sandesh send queue
+ * @cli_name: update sandesh send queue
+ */
+request sandesh SandeshSendQueueSet {
+    /** enable or disable sandesh send queue */
+    1: optional bool enable;
+}
+
+/**
+ * @description: sandesh request to get sandesh send queue status
+ * @cli_name: read sandesh send queue status
+ */
+request sandesh SandeshSendQueueStatus {
+}
+
+response sandesh SandeshSendQueueResponse {
+   1: bool enable;
+}
+
+/**
+ * @description: sandesh request to get collector info
+ * @cli_name: read collector information
+ */
+request sandesh CollectorInfoRequest {
+}
+
+response sandesh CollectorInfoResponse {
+    1: string ip;
+    2: i32 port;
+    3: string status;
+}
+
+/**
+ * @description: sandesh request to get derived stats config
+ */
+request sandesh SandeshUVEDSConfReq {
+    1: string tname
+    2: string dsattr
+    3: string dsconf
+}
+
+response sandesh SandeshUVEDSConfResp {
+    1: bool success
+    2: optional map<string,string> dsconf
+}
+
+request sandesh SandeshUVECacheReq {
+    1: string tname;
+    2: optional string key;
+}
+
+response sandesh SandeshUVECacheResp {
+    1: u32 returned;
+    2: optional i32 period;
+}
+
+request sandesh SandeshUVETypesReq {
+}
+
+struct SandeshUVETypeInfo {
+    1: string type_name (link="SandeshUVECacheReq")
+    2: u32 seq_num;
+    3: i32 period
+    4: map <string,string> dsconf
+    5: i32 timeout
+}
+
+response sandesh SandeshUVETypesResp {
+    1: list<SandeshUVETypeInfo> type_info;
+}
+
+struct SandeshStateMachineEvStats {
+    1: string                     event;
+    2: u64                        enqueues;
+    3: u64                        dequeues;
+    4: u64                        enqueue_fails;
+    5: u64                        dequeue_fails;
+}
+
+struct SandeshStateMachineStats {
+    1: optional list<SandeshStateMachineEvStats> ev_stats
+    2: optional string                     state
+    3: optional u64                        state_since
+    4: optional string                     last_state
+    5: optional string                     last_event
+    6: optional u64                        last_event_at
+}
+
+struct SandeshClientInfo {
+    1: optional string status
+    2: optional u32 successful_connections
+    3: optional u32 pid
+    4: optional u32 http_port
+    5: optional u64 start_time
+    6: optional string collector_name
+    11: optional string collector_ip
+    12: optional list<string> collector_list
+    9: optional io.SocketIOStats rx_socket_stats
+    10: optional io.SocketIOStats tx_socket_stats
+}
+
+struct SandeshSessionStats {
+    1: u64                        num_recv_msg
+    2: u64                        num_recv_msg_fail
+    3: u64                        num_recv_fail
+    4: u64                        num_send_msg
+    5: u64                        num_send_msg_fail
+    6: u64                        num_send_buffer_fail
+    7: u64                        num_wait_msgq_enqueue
+    8: u64                        num_wait_msgq_dequeue
+    9: u64                        num_write_ready_cb_error
+}
+
+struct ModuleClientState {
+    1: string                              name (key="ObjectGeneratorInfo")
+    2: optional bool                       deleted
+    3: optional SandeshClientInfo          client_info
+    5: optional u64                        sm_queue_count
+    6: optional SandeshStateMachineStats   sm_stats
+    7: optional SandeshSessionStats        session_stats
+    8: optional io.SocketIOStats           session_rx_socket_stats
+    9: optional io.SocketIOStats           session_tx_socket_stats
+
+    /** @display_name:Sandesh Client Message Type Stats*/
+    10: optional map<string, SandeshMessageStats> msg_type_agg  (metric="agg", tags=".__key")
+
+    /** @display_name:Sandesh Client Message Stats*/
+    20: optional map<string, u64>  tx_msg_agg  (metric="agg", tags=".__key")
+
+    14: optional u64                       max_sm_queue_count
+}
+
+/**
+* @description: This uve is used for statistics data related to sandesh client
+* @object: generator
+*/
+uve sandesh SandeshModuleClientTrace {
+    1: ModuleClientState                   data
+}

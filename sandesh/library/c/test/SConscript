@@ -1,0 +1,87 @@
+# -*- mode: python; -*-
+
+#
+# Copyright (c) 2013 Juniper Networks, Inc. All rights reserved.
+#
+
+Import('SandeshEnv')
+import sys
+
+env = SandeshEnv.Clone()
+
+env.Append(CPPPATH = [
+    Dir('#build/include').abspath,
+    Dir('#src/contrail-common').abspath,
+    '../../common/test/',
+    './gen-c/',
+])
+
+# Generate the source files
+SandeshCTestGenFiles = env.SandeshGenC('sandesh_c_test.sandesh')
+SandeshCTestGenSrcs = env.ExtractC(SandeshCTestGenFiles)
+
+SandeshLibPath = [
+    '#/build/lib',
+    Dir(env['TOP']).abspath + '/base',
+    Dir(env['TOP']).abspath + '/base/test',
+    Dir(env['TOP']).abspath + '/io',
+]
+
+SandeshLibs = [
+    'gunit',
+    'sandesh',
+    'sandesh-c',
+    'http',
+    'http_parser',
+    'curl',
+    'process_info',
+    'io',
+    'ssl',
+    'crypto',
+    'sandeshvns',
+    'base',
+    'boost_system',
+    'boost_regex',
+    'boost_date_time',
+    'log4cplus',
+    'xml2',
+    'task_test',
+    'pugixml',
+]
+
+SandeshLibs.extend([
+    'pthread',
+    'xslt',
+])
+
+if env.UseSystemTBB():
+    SandeshLibs.append('tbb')
+else:
+    SandeshLibs.append('tbb_debug')
+
+env.Append(LIBPATH = SandeshLibPath)
+
+env.Prepend(LIBS = SandeshLibs)
+
+if sys.platform not in ['darwin']:
+    env.Append(LIBS = ['rt'])
+
+sandesh_pre_c_test = env.UnitTest('sandesh_pre_c_test',
+    env['SandeshBufferTestGenCppObjs'] + ['sandesh_pre_c_test.cc'])
+env.Alias('src/sandesh:sandesh_pre_c_test', sandesh_pre_c_test)
+
+sandesh_c_test = env.UnitTest('sandesh_c_test', SandeshCTestGenSrcs +
+    env['SandeshBufferTestGenCObjs'] + ['sandesh_c_test.cc'])
+env.Alias('src/sandesh:sandesh_c_test', sandesh_c_test)
+
+env.Depends(sandesh_c_test, sandesh_pre_c_test)
+
+test_suite = [
+    sandesh_pre_c_test,
+    sandesh_c_test
+]
+
+test = env.TestSuite('sandesh-c-test', test_suite)
+env.Alias('sandesh:ctest', test)
+
+Return('test_suite')
