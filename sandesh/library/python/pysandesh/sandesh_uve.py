@@ -39,7 +39,7 @@ class SandeshUVETypeMaps(object):
         except KeyError:
             self._uve_data_type_map[uve_data_type_name] = uve_type_name
         else:
-            self._logger.error('UVE data type "%s" to UVE "%s" already added' %
+            self._logger.info('UVE data type "%s" to UVE "%s" already added' %
                                (uve_data_type_name, uve_type_name))
             print(uve_type)
             assert 0
@@ -51,7 +51,7 @@ class SandeshUVETypeMaps(object):
         except KeyError:
             self._uve_global_map[uve_type_name] = uve_type_map
         else:
-            self._logger.error('UVE type "%s" already added' % (uve_type_name))
+            self._logger.info('UVE type "%s" already added' % (uve_type_name))
             print(uve_map)
             assert 0
     # end register_uve_type_map
