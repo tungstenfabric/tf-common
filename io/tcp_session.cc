@@ -486,13 +486,20 @@ void TcpSession::AsyncReadHandler(TcpSessionPtr session) {
         session->ReleaseBufferLocked(buffer);
         // eof is returned when the peer closed the socket, no need to log error
         if (error != boost::asio::error::eof) {
+            if (strcmp(error.category().name(), "asio.ssl") == 0  && error.value() == 335544539) {
+            TCP_SESSION_LOG_DEBUG(session, TCP_DIR_IN,
+                    "Read failed due to error "
+                    << error.category().name() << " "
+                    << error.value()
+                    << " : " << error.message());
+            } else {
             TCP_SESSION_LOG_ERROR(session, TCP_DIR_IN,
                     "Read failed due to error "
                     << error.category().name() << " "
                     << error.value()
                     << " : " << error.message());
+            }
         }
-
         lock.release();
         session->CloseInternal(error, true);
         return;
