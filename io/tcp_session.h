@@ -27,6 +27,8 @@
 #include "base/task.h"
 #include "io/tcp_server.h"
 
+#define SSL_SHORT_READ_ERROR 335544539
+
 class EventManager;
 class TcpServer;
 class TcpSession;
