@@ -64,7 +64,7 @@ class SandeshLogger(sandesh_base_logger.SandeshBaseLogger):
             # add the handler only once
             self._logging_file_handler = logging.StreamHandler()
             log_format = logging.Formatter(
-                '%(asctime)s [%(name)s] [%(levelname)s]: %(message)s',
+                '%(asctime)s.%(msecs)03d %(thread)x [%(name)s] [%(levelname)s]: %(message)s',
                 datefmt='%m/%d/%Y %I:%M:%S %p')
             self._logging_file_handler.setFormatter(log_format)
             self._logger.addHandler(self._logging_file_handler)
@@ -120,8 +120,8 @@ class SandeshLogger(sandesh_base_logger.SandeshBaseLogger):
                         filename=file, maxBytes=maxBytes,
                         backupCount=backupCount))
             log_format = logging.Formatter(
-                '%(asctime)s [%(name)s] [%(levelname)s]: %(message)s',
-                datefmt='%m/%d/%Y %I:%M:%S %p')
+                '%(asctime)s.%(msecs)03d %(thread)x [%(name)s] [%(levelname)s]: %(message)s',
+                datefmt='%m/%d/%Y %H:%M:%S.%f')
             logging_file_handler.setFormatter(log_format)
             logger.addHandler(logging_file_handler)
         if enable_syslog:
@@ -176,7 +176,7 @@ class SandeshLogger(sandesh_base_logger.SandeshBaseLogger):
                         filename=file, maxBytes=maxBytes,
                         backupCount=backupCount))
             log_format = logging.Formatter(
-                '%(asctime)s [%(name)s] [%(levelname)s]: %(message)s',
+                '%(asctime)s.%(msecs)03d %(thread)x [%(name)s] [%(levelname)s]: %(message)s',
                 datefmt='%m/%d/%Y %I:%M:%S %p')
             self._logging_file_handler.setFormatter(log_format)
             self._logger.addHandler(self._logging_file_handler)
