@@ -23,7 +23,8 @@ SslServer::SslServer(EventManager *evm, boost::asio::ssl::context::method m,
     context_.set_options(boost::asio::ssl::context::default_workarounds |
             boost::asio::ssl::context::no_sslv3 |
             boost::asio::ssl::context::no_sslv2 |
-            boost::asio::ssl::context::no_tlsv1, ec);
+            boost::asio::ssl::context::no_tlsv1 |
+            boost::asio::ssl::context::no_tlsv1_1, ec);
     assert(ec.value() == 0);
 
 #if BOOST_VERSION >= 105400
