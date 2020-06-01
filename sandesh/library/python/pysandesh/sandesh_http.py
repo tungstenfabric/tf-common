@@ -154,7 +154,7 @@ class SandeshHttp(object):
                         ca_certs=ca_certs,
                         keyfile=keyfile,
                         certfile=certfile,
-                        ssl_version=ssl.PROTOCOL_SSLv23,
+                        ssl_version=ssl.PROTOCOL_TLSv1_2,
                         cert_reqs=ssl.CERT_NONE if
                         self._sandesh_config.introspect_ssl_insecure else
                         ssl.CERT_REQUIRED,
