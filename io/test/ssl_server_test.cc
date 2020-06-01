@@ -58,7 +58,7 @@ class EchoSession : public SslSession {
 class EchoServer : public SslServer {
 public:
     EchoServer(EventManager *evm, bool ssl_handshake_delayed = false) :
-        SslServer(evm, boost::asio::ssl::context::sslv23_server,
+        SslServer(evm, boost::asio::ssl::context::tlsv12_server,
                   true, ssl_handshake_delayed),
         session_(NULL),
         ssl_handshake_delayed_(ssl_handshake_delayed),
@@ -184,8 +184,9 @@ class ClientSession : public SslSession {
 class SslClient : public SslServer {
 public:
     SslClient(EventManager *evm, bool ssl_handshake_delayed = false,
-            bool large_data = false) :
-        SslServer(evm, boost::asio::ssl::context::sslv23, true, ssl_handshake_delayed),
+            bool large_data = false,
+	    boost::asio::ssl::context::method m = boost::asio::ssl::context::tlsv12_client) :
+        SslServer(evm, m, true, ssl_handshake_delayed),
         session_(NULL),
         large_data_(large_data),
         ssl_handshake_delayed_(ssl_handshake_delayed),
@@ -484,6 +485,44 @@ TEST_F(SslEchoServerTest, HandshakeFailure) {
     client = NULL;
 }
 
+TEST_F(SslEchoServerTest, HandshakeVersionNegotiationFailure) {
+
+    SetUpImmedidate();
+    // create a client with ssl method tlsv1.1, since server is running tlsv1.2,
+    // handshake should fail.
+    SslClient *client = new SslClient(evm_.get(), false, false,
+		    boost::asio::ssl::context::tlsv11_client);
+    task_util::WaitForIdle();
+    server_->Initialize(0);
+    task_util::WaitForIdle();
+    thread_->Start();		// Must be called after initialization
+
+    connect_success_ = 0;
+    ClientSession *session = static_cast<ClientSession *>(client->CreateSession());
+    session->set_observer(boost::bind(&SslEchoServerTest::OnEvent, this, _1, _2));
+    boost::asio::ip::tcp::endpoint endpoint;
+    boost::system::error_code ec;
+    endpoint.address(boost::asio::ip::address::from_string("127.0.0.1", ec));
+    endpoint.port(server_->GetPort());
+    client->Connect(session, endpoint);
+    task_util::WaitForIdle();
+    StartConnectTimer(session, 10);
+    TASK_UTIL_EXPECT_FALSE(session->IsEstablished());
+    TASK_UTIL_EXPECT_TRUE(session->IsClosed());
+    TASK_UTIL_EXPECT_EQ(connect_success_, 0);
+
+    session->Close();
+    client->DeleteSession(session);
+    task_util::WaitForIdle();
+
+    TASK_UTIL_EXPECT_EQ(server_->GetSessionCount(), 0);
+    TASK_UTIL_EXPECT_FALSE(server_->HasSessions());
+
+    client->Shutdown();
+    task_util::WaitForIdle();
+    TcpServerManager::DeleteServer(client);
+    client = NULL;
+}
 TEST_F(SslEchoServerTest, DISABLED_test_delayed_ssl_handshake) {
 
     SetUpDelayedHandShake();

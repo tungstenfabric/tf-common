@@ -10,7 +10,7 @@
 using namespace std;
 
 HttpServer::HttpServer(EventManager *evm, const SslConfig &config, uint8_t dscp)
-    : SslServer(evm, boost::asio::ssl::context::sslv23_server,
+    : SslServer(evm, boost::asio::ssl::context::tlsv12_server,
                 config.ssl_enabled, false), dscp_value_(dscp) {
     //ctor
     if (config.ssl_enabled) {
@@ -22,7 +22,9 @@ HttpServer::HttpServer(EventManager *evm, const SslConfig &config, uint8_t dscp)
         // set mode
         ctx->set_options(boost::asio::ssl::context::default_workarounds |
                          boost::asio::ssl::context::no_sslv3 |
-			 boost::asio::ssl::context::no_sslv2, ec);
+			 boost::asio::ssl::context::no_sslv2 |
+			 boost::asio::ssl::context::no_tlsv1 |
+			 boost::asio::ssl::context::no_tlsv1_1, ec);
         if (ec.value() != 0) {
             exit(EINVAL);
         }

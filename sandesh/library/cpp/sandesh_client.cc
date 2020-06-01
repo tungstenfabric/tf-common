@@ -63,7 +63,7 @@ SandeshClient::SandeshClient(EventManager *evm,
         const std::vector<Endpoint> &collectors,
         const SandeshConfig &config,
         bool periodicuve)
-    :   SslServer(evm, boost::asio::ssl::context::sslv23_client,
+    :   SslServer(evm, boost::asio::ssl::context::tlsv12_client,
                   config.sandesh_ssl_enable),
         sm_task_instance_(kSMTaskInstance),
         sm_task_id_(TaskScheduler::GetInstance()->GetTaskId(kSMTask)),
@@ -93,7 +93,8 @@ SandeshClient::SandeshClient(EventManager *evm,
         ctx->set_options(boost::asio::ssl::context::default_workarounds |
                          boost::asio::ssl::context::no_tlsv1 |
                          boost::asio::ssl::context::no_sslv3 |
-                         boost::asio::ssl::context::no_sslv2, ec);
+                         boost::asio::ssl::context::no_sslv2 |
+			 boost::asio::ssl::context::no_tlsv1_1, ec);
         if (ec.value() != 0) {
             SANDESH_LOG(ERROR, "Error setting ssl options: " << ec.message());
             exit(EINVAL);
