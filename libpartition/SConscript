@@ -36,13 +36,25 @@ sdist_gen = PartEnv.Command('dist/libpartition-0.1dev.tar.gz', 'setup.py', cd_cm
 # install everything before building distribution
 PartEnv.Depends(sdist_gen, sdist_depends)
 
+def SymLink(target, source, env):
+    os.symlink(os.path.abspath(str(source[0])), os.path.abspath(str(target[0])))
+
 if 'install' in BUILD_TARGETS:
-    install_cmd = PartEnv.Command(None,
-                                'setup.py',
-                                cd_cmd + 'python setup.py install %s' %
-                                PartEnv['PYTHON_INSTALL_OPT'])
-    PartEnv.Depends(install_cmd, sdist_depends)
-    PartEnv.Alias('install', install_cmd)
+    install_cmd_py2 = PartEnv.Command(None,
+                                      'setup.py',
+                                      cd_cmd + 'python setup.py install %s' %
+                                      PartEnv['PYTHON_INSTALL_OPT'])
+    PartEnv.Depends(install_cmd_py2, sdist_depends)
+    PartEnv.Alias('install', install_cmd_py2)
+
+    setup_link_cmd = env.Command("setup-py3.py", "setup.py", SymLink)
+    env.Depends(setup_link_cmd, sdist_depends)
+    install_cmd_py3 = PartEnv.Command(None,
+                                      'setup-py3.py',
+                                      cd_cmd + 'python setup-py3.py install %s' %
+                                      PartEnv['PYTHON_INSTALL_OPT'])
+    PartEnv.Depends(install_cmd_py3, sdist_depends)
+    PartEnv.Alias('install', install_cmd_py3)
 
 PartEnv['LIBPARTITION_PKG'] = sdist_gen
 #PartEnv.SConscript('test/SConscript', exports='PartEnv', duplicate = 0)
