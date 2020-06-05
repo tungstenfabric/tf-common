@@ -4,6 +4,8 @@
 # Copyright (c) 2013 Juniper Networks, Inc. All rights reserved.
 #
 
+import os
+
 Import('SandeshEnv');
 
 env = SandeshEnv.Clone();
@@ -197,11 +199,21 @@ env.Alias('sandesh/library/python:pysandesh', sdist_gen)
 env.Alias('sandesh/library/python:sdist', sdist_gen)
 env.Alias('nodemgr-full', sdist_gen)
 
+def SymLink(target, source, env):
+    os.symlink(os.path.abspath(str(source[0])), os.path.abspath(str(target[0])))
+
 if 'install' in BUILD_TARGETS:
     cmd = 'cd ' + Dir('.').path + ' && python setup.py install %s'
-    install_cmd = env.Command(None, 'setup.py', cmd % env['PYTHON_INSTALL_OPT'])
-    env.Depends(install_cmd, sdist_depends)
-    env.Alias('install', install_cmd)
+    install_cmd_py2 = env.Command(None, 'setup.py', cmd % env['PYTHON_INSTALL_OPT'])
+    env.Depends(install_cmd_py2, sdist_depends)
+    env.Alias('install', install_cmd_py2)
+
+    setup_link_cmd = env.Command("setup-py3.py", "setup.py", SymLink)
+    env.Depends(setup_link_cmd, sdist_depends)
+    cmd = 'cd ' + Dir('.').path + ' && python setup-py3.py install %s'
+    install_cmd_py3 = env.Command(None, 'setup-py3.py', cmd % env['PYTHON_INSTALL_OPT'])
+    env.Depends(install_cmd_py3, sdist_depends)
+    env.Alias('install', install_cmd_py3)
 
 # SetupPyTestSuite* methods don't return any target (please check review 40381)
 # So, until above is merged, we add a target here directly, by referencing a target
