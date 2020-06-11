@@ -66,6 +66,12 @@ class ZookeeperCBindings : public ZookeeperInterface {
                                          struct Stat *stat) {
         return zoo_exists(zh, path, watch, stat);
     }
+    virtual zhandle_t* ZookeeperInitSSL(const char *host, const char *cert,
+        watcher_fn fn, int recv_timeout, const clientid_t *clientid,
+        void *context, int flags) {
+        return zookeeper_init_ssl(host, cert, fn, recv_timeout, clientid,
+            context, flags);
+    }
 };
 
 } // namespace interface
@@ -75,11 +81,15 @@ namespace impl {
 
 // ZookeeperClientImpl
 ZookeeperClientImpl::ZookeeperClientImpl(const char *hostname,
-    const char *servers, zookeeper::interface::ZookeeperInterface *zki) :
+    const char *servers, bool zookeeper_ssl_enable,
+    const char *zookeeper_ssl_files,
+    zookeeper::interface::ZookeeperInterface *zki) :
     hostname_(hostname),
     servers_(servers),
     zk_handle_(NULL),
     connected_(false),
+    zookeeper_ssl_enable_(zookeeper_ssl_enable),
+    zookeeper_ssl_files_(zookeeper_ssl_files),
     zki_(zki) {
     // Set loglevel
     zki_->ZooSetDebugLevel(ZOO_LOG_LEVEL_DEBUG);
@@ -90,12 +100,22 @@ ZookeeperClientImpl::~ZookeeperClientImpl() {
 
 bool ZookeeperClientImpl::Connect() {
     while (true) {
-        zk_handle_ = zki_->ZookeeperInit(servers_.c_str(),
+        if(zookeeper_ssl_enable_) {
+            zk_handle_ = zki_->ZookeeperInitSSL(servers_.c_str(),
+                                                  zookeeper_ssl_files_.c_str(),
+                                                  NULL,
+                                                  kSessionTimeoutMSec_,
+                                                  NULL,
+                                                  NULL,
+                                                  0);
+        } else {
+            zk_handle_ = zki_->ZookeeperInit(servers_.c_str(),
                                          NULL,
                                          kSessionTimeoutMSec_,
                                          NULL,
                                          NULL,
                                          0);
+        }
         if (zk_handle_ == NULL) {
             int zerrno(errno);
             ZOO_LOG_ERR("zookeeper_init FAILED: (" << zerrno <<
@@ -269,8 +289,10 @@ std::string ZookeeperClientImpl::Name() const {
 } // namespace impl
 
 // ZookeeperClient
-ZookeeperClient::ZookeeperClient(const char *hostname, const char *servers) :
-    impl_(new impl::ZookeeperClientImpl(hostname, servers,
+ZookeeperClient::ZookeeperClient(const char *hostname, const char *servers, 
+        bool zookeeper_ssl_enable, const char *zookeeper_ssl_files) :
+    impl_(new impl::ZookeeperClientImpl(hostname, servers, zookeeper_ssl_enable,
+        zookeeper_ssl_files,
         new zookeeper::interface::ZookeeperCBindings)) {
 }
 
