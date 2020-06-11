@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "525a066d_d36fc9e9",
+        "filename": "io/tcp_session.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 474
+      },
+      "writtenOn": "2020-06-11T07:34:37Z",
+      "side": 1,
+      "message": "define macro as SSL_SHORT_READ_ERROR",
+      "range": {
+        "startLine": 489,
+        "startChar": 86,
+        "endLine": 489,
+        "endChar": 95
+      },
+      "revId": "69aa2e9e46970e9ee301b7aa10f3de869e6b2b95",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
