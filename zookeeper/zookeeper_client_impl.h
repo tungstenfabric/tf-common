@@ -19,6 +19,7 @@ namespace impl {
 class ZookeeperClientImpl {
  public:
     ZookeeperClientImpl(const char *hostname, const char *servers,
+        bool zookeeper_ssl_enable, const char *zookeeper_ssl_files,
         zookeeper::interface::ZookeeperInterface *zki);
     virtual ~ZookeeperClientImpl();
 
@@ -41,6 +42,8 @@ class ZookeeperClientImpl {
     std::string servers_;
     zhandle_t *zk_handle_;
     bool connected_;
+    bool zookeeper_ssl_enable_;
+    std::string zookeeper_ssl_files_;
     std::auto_ptr<zookeeper::interface::ZookeeperInterface> zki_;
 };
 

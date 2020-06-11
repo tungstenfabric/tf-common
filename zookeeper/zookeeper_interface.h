@@ -27,6 +27,9 @@ class ZookeeperInterface {
         char *buffer, int* buffer_len, struct Stat *stat) = 0;
     virtual int ZooExists(zhandle_t *zh, const char *path, int watch,
                                          struct Stat *stat) = 0;
+    virtual zhandle_t* ZookeeperInitSSL(const char *host, const char *cert,
+        watcher_fn fn, int recv_timeout, const clientid_t *clientid,
+        void *context, int flags) = 0;
 };
 
 } // namespace interface
