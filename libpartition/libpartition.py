@@ -55,7 +55,10 @@ class PartitionClient(object):
     """
     def __init__(
             self, app_name, self_name, cluster_list, max_partition,
-            partition_update_cb, zk_server, logger = None):
+            partition_update_cb, zk_server, logger = None,
+	    zookeeper_ssl_params={'ssl_enable':False,
+                'zookeeper_ssl_certfile':None, 'zookeeper_ssl_keyfile':None,
+                'zookeeper_ssl_ca_cert':None}):
        
         # Initialize local variables
         self._zk_server = zk_server
@@ -66,6 +69,7 @@ class PartitionClient(object):
         self._target_part_ownership_list = []
         self._con_hash = ConsistentHash(cluster_list)
         self._name = self_name
+        self._zookeeper_ssl_params = zookeeper_ssl_params
 
         # some sanity check
         if not(self._name in cluster_list):
@@ -83,8 +87,15 @@ class PartitionClient(object):
         # connect to zookeeper
         while True:
             self._logger.error("Libpartition zk start")
-            self._zk = KazooClient(zk_server, timeout=60.0)
-            self._zk.add_listener(self._zk_listen)
+            if self._zookeeper_ssl_params['ssl_enable']:
+		self._zk = KazooClient(hosts=zk_server, timeout=60.0,
+                      use_ssl=True, keyfile=self._zookeeper_ssl_params['ssl_keyfile'],
+                      certfile=self._zookeeper_ssl_params['ssl_certfile'],
+                      ca=self._zookeeper_ssl_params['ssl_ca_cert'])
+            else:
+            	self._zk = KazooClient(zk_server, timeout=60.0)
+            
+	    self._zk.add_listener(self._zk_listen)
             try:
                 self._zk.start()
                 while self._conn_state != ConnectionStatus.UP:
