@@ -6,6 +6,8 @@ Import('BuildEnv')
 ZooEnv = BuildEnv.Clone()
 
 ZooEnv.Append(CPPPATH = ['/usr/include'])
+ZooEnv.Append(CCFLAGS=' -DTHREADED')
+ZooEnv.Append(CCFLAGS=' -DHAVE_OPENSSL_H')
 sources = ['zookeeper_client.cc']
 
 libzoo = ZooEnv.Library('zookeeper_client', source = sources)
