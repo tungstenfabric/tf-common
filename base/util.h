@@ -162,7 +162,7 @@ private:
     T *ptr_;
 };
 
-template <class KeyType, template <class KeyType> class SmartPointer>
+template <class KeyType, template <class> class SmartPointer>
 struct SmartPointerComparator {
     bool operator()( const SmartPointer<KeyType> lhs,
                      const SmartPointer<KeyType> rhs) const {
