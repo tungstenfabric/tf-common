@@ -26,7 +26,8 @@ typedef enum Z_NODE_TYPE {
 //
 class ZookeeperClient {
  public:
-    ZookeeperClient(const char *hostname, const char *servers);
+    ZookeeperClient(const char *hostname, const char *servers,
+            bool zookeeper_ssl_enable, const char *zookeeper_ssl_files);
     virtual ~ZookeeperClient();
     bool CreateNode(const char *path,
                     const char *data,
