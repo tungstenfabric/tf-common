@@ -170,7 +170,7 @@ sandesh_encode (void *sandesh, const char *sname,
                    sname, *error);
         }
 #elif (!defined(SANDESH_QUIET))
-        os_log(OS_LOG_ERR, "Write: Encode sandesh %s FAILED(%d)", sname, *error);
+        os_log(OS_LOG_DEBUG, "Write: Encode sandesh %s FAILED(%d)", sname, *error);
 #endif
         return -1;
     }
