@@ -162,7 +162,7 @@ thrift_xml_protocol_write_i64 (ThriftProtocol *protocol, const int64_t value,
     int size;
     char buf[MAX_XML_BUFFER_SIZE];
 
-    size = snprintf(buf, MAX_XML_BUFFER_SIZE, "%lld\n", value);
+    size = snprintf(buf, MAX_XML_BUFFER_SIZE, "%ld\n", value);
     if (size > 0) {
         if (thrift_transport_write (protocol->transport,
                                     (const void *) buf, size, error))
@@ -180,7 +180,7 @@ thrift_xml_protocol_write_u64 (ThriftProtocol *protocol, const uint64_t value,
     int size;
     char buf[MAX_XML_BUFFER_SIZE];
 
-    size = snprintf(buf, MAX_XML_BUFFER_SIZE, "%llu\n", value);
+    size = snprintf(buf, MAX_XML_BUFFER_SIZE, "%lu\n", value);
     if (size > 0) {
         if (thrift_transport_write (protocol->transport,
                                     (const void *) buf, size, error))
