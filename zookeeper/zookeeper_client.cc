@@ -25,6 +25,9 @@
             << _Msg);                                                     \
     } while (false)
 
+extern void zk_watch(zhandle_t *zh, int type,
+        int state, const char *path,void *watcherCtx);
+
 namespace zookeeper {
 namespace interface {
 
@@ -75,7 +78,7 @@ namespace impl {
 
 // ZookeeperClientImpl
 ZookeeperClientImpl::ZookeeperClientImpl(const char *hostname,
-    const char *servers, zookeeper::interface::ZookeeperInterface *zki) :
+    const char *servers, zookeeper::interface::ZookeeperInterface *zki/*, zhandle_t *zh, bool connected*/) :
     hostname_(hostname),
     servers_(servers),
     zk_handle_(NULL),
@@ -91,7 +94,7 @@ ZookeeperClientImpl::~ZookeeperClientImpl() {
 bool ZookeeperClientImpl::Connect() {
     while (true) {
         zk_handle_ = zki_->ZookeeperInit(servers_.c_str(),
-                                         NULL,
+                                         &zk_watch,
                                          kSessionTimeoutMSec_,
                                          NULL,
                                          NULL,
@@ -251,7 +254,6 @@ bool ZookeeperClientImpl::DeleteNode(const char *path) {
             return false;
         }
     }
-
     rc = DeleteNodeSync(path, &err);
     if (rc != ZOK) {
         ZOO_LOG_ERR("Deletion of ZNODE(" << path << "): "
@@ -269,9 +271,9 @@ std::string ZookeeperClientImpl::Name() const {
 } // namespace impl
 
 // ZookeeperClient
-ZookeeperClient::ZookeeperClient(const char *hostname, const char *servers) :
+ZookeeperClient::ZookeeperClient(const char *hostname, const char *servers/*, zhandle_t *zh, bool connected*/) :
     impl_(new impl::ZookeeperClientImpl(hostname, servers,
-        new zookeeper::interface::ZookeeperCBindings)) {
+        new zookeeper::interface::ZookeeperCBindings/*, zh, connected*/)) {
 }
 
 ZookeeperClient::ZookeeperClient(impl::ZookeeperClientImpl *impl) :
@@ -300,6 +302,10 @@ bool ZookeeperClient::DeleteNode(const char *path) {
 
 void ZookeeperClient::Shutdown() {
     return impl_->Shutdown();
+}
+
+bool ZookeeperClient::Reconnect() {
+    return impl_->Reconnect();
 }
 
 ZookeeperClient::~ZookeeperClient() {

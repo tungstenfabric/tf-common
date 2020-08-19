@@ -19,7 +19,7 @@ namespace impl {
 class ZookeeperClientImpl {
  public:
     ZookeeperClientImpl(const char *hostname, const char *servers,
-        zookeeper::interface::ZookeeperInterface *zki);
+        zookeeper::interface::ZookeeperInterface *zki/*, zhandle_t *zh, bool connected*/);
     virtual ~ZookeeperClientImpl();
 
     bool Connect();
