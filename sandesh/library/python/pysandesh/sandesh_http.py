@@ -132,7 +132,7 @@ class SandeshHttp(object):
         try:
             sock = StreamServer.get_listener(
                 (self._http_ip, self._http_port), family=socket.AF_INET)
-        except socket.error as e:
+        except (socket.error, OSError) as e:
             self._logger.error('Unable to open HTTP Port %d, %s' %
                                (self._http_port, e))
             sys.exit()
