@@ -103,7 +103,10 @@ public:
     uint8_t GetDscpValue(NativeSocketType fd) const;
     int SetListenSocketDscp(uint8_t value);
     int SetSocketOptions(const SandeshConfig &sandesh_config);
-    int SetKeepAliveSocketOption(int fd, const SandeshConfig &sandesh_config);
+    int SetKeepAliveSocketOption(const SandeshConfig &sandesh_config);
+    int SetKeepAliveSocketOption(int tcp_keepalive_enable,
+                    int tcp_keepalive_idle_time, int tcp_keepalive_probes,
+                    int tcp_keepalive_interval);
 
 protected:
     typedef boost::intrusive_ptr<TcpServer> TcpServerPtr;
