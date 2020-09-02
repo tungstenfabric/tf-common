@@ -6,6 +6,8 @@
 #define ZOOKEEPER_ZOOKEEPER_CLIENT_H_
 
 class ZookeeperClientTest;
+#include <zookeeper/zookeeper.h>
+#include <zookeeper/zookeeper_interface.h>
 
 namespace zookeeper {
 namespace client {
@@ -26,7 +28,7 @@ typedef enum Z_NODE_TYPE {
 //
 class ZookeeperClient {
  public:
-    ZookeeperClient(const char *hostname, const char *servers);
+    ZookeeperClient(const char *hostname, const char *servers, zhandle_t *zh = NULL, bool connected = false);
     virtual ~ZookeeperClient();
     bool CreateNode(const char *path,
                     const char *data,
@@ -34,6 +36,7 @@ class ZookeeperClient {
     bool CheckNodeExist(const char* path);
     bool DeleteNode(const char* path);
     void Shutdown();
+    bool Reconnect();
 
  private:
     ZookeeperClient(impl::ZookeeperClientImpl *impl);
