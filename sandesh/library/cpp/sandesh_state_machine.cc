@@ -780,10 +780,11 @@ void SandeshStateMachine::UpdateEventDequeueFail(const sc::event_base &event) {
 
 void SandeshStateMachine::UpdateEventStats(const sc::event_base &event,
         bool enqueue, bool fail) {
-    std::string event_name(TYPE_NAME(event));
-    tbb::mutex::scoped_lock lock(smutex_);
-    event_stats_.Update(event_name, enqueue, fail);
-    lock.release();
+    if (!deleted_) {
+        std::string event_name(TYPE_NAME(event));
+        tbb::mutex::scoped_lock lock(smutex_);
+        event_stats_.Update(event_name, enqueue, fail);
+    }
 }
 
 bool SandeshStateMachine::DequeueEvent(SandeshStateMachine::EventContainer &ec) {

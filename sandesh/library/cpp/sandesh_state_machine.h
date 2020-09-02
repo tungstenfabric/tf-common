@@ -198,6 +198,7 @@ private:
     bool IsValid() const;
 
     const char *prefix_;
+    mutable tbb::mutex smutex_;
     typedef WorkQueue<EventContainer> EventQueue;
     EventQueue work_queue_;
     SandeshConnection *connection_;
@@ -213,7 +214,6 @@ private:
     uint64_t last_event_at_;
 
     std::string generator_key_;
-    mutable tbb::mutex smutex_;
     SandeshEventStatistics event_stats_;
     SandeshMessageStatistics message_stats_;
     SandeshMessageBuilder *builder_;
