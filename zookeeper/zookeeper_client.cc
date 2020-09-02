@@ -10,6 +10,7 @@
 #include <zookeeper/zookeeper_client.h>
 #include <zookeeper/zookeeper_client_impl.h>
 #include <zookeeper/zookeeper_interface.h>
+#include <sandesh/common/vns_constants.h>
 
 #define ZOO_LOG(_Level, _Msg)                                             \
     do {                                                                  \
@@ -24,6 +25,9 @@
         LOG(ERROR, __func__ << ":" << __FILE__ << ":" << __LINE__ << ": " \
             << _Msg);                                                     \
     } while (false)
+
+static std::string self_hostname;
+static std::string zookeeper_servers_ip;
 
 namespace zookeeper {
 namespace interface {
@@ -75,23 +79,54 @@ namespace impl {
 
 // ZookeeperClientImpl
 ZookeeperClientImpl::ZookeeperClientImpl(const char *hostname,
-    const char *servers, zookeeper::interface::ZookeeperInterface *zki) :
+    const char *servers, zookeeper::interface::ZookeeperInterface *zki,
+    zhandle_t *zh, bool connected) :
     hostname_(hostname),
     servers_(servers),
-    zk_handle_(NULL),
-    connected_(false),
+    zk_handle_(zh),
+    connected_(connected),
     zki_(zki) {
     // Set loglevel
     zki_->ZooSetDebugLevel(ZOO_LOG_LEVEL_DEBUG);
+    zookeeper_servers_ip = servers;
+    self_hostname = hostname;
 }
 
 ZookeeperClientImpl::~ZookeeperClientImpl() {
 }
 
+void zk_watch(zhandle_t *zh, int type,
+        int state, const char *path,void *watcherCtx) {
+
+     ZOO_LOG(DEBUG, "Callback from Zookeeper zk_watch called with type = "
+             <<type<< " state = " << state);
+     std::auto_ptr<zookeeper::client::ZookeeperClient> zoo_client__;
+     zoo_client__.reset(new ZookeeperClient(self_hostname.c_str(),
+            zookeeper_servers_ip.c_str(), zh, true));
+
+    std::string path1 = "/analytics-discovery-/" +
+        g_vns_constants.COLLECTOR_DISCOVERY_SERVICE_NAME;
+    path1 += "/" + self_hostname;
+
+    if(state == ZOO_EXPIRED_SESSION_STATE) {
+        zoo_client__->Reconnect();
+    }
+
+    if (!zoo_client__->CheckNodeExist(path1.c_str())) {
+        ZOO_LOG(DEBUG, "zk_watch path = " << path1
+                << " doesn't exist. Creating node again in Zookeeper");
+        if(state == ZOO_CONNECTED_STATE) {
+           zoo_client__->CreateNode(path1.c_str(), self_hostname.c_str(),
+                                Z_NODE_TYPE_EPHEMERAL);
+        }
+    }
+}
+
+
 bool ZookeeperClientImpl::Connect() {
     while (true) {
         zk_handle_ = zki_->ZookeeperInit(servers_.c_str(),
-                                         NULL,
+                                         &zk_watch,
                                          kSessionTimeoutMSec_,
                                          NULL,
                                          NULL,
@@ -269,9 +304,9 @@ std::string ZookeeperClientImpl::Name() const {
 } // namespace impl
 
 // ZookeeperClient
-ZookeeperClient::ZookeeperClient(const char *hostname, const char *servers) :
+ZookeeperClient::ZookeeperClient(const char *hostname, const char *servers, zhandle_t *zh, bool connected) :
     impl_(new impl::ZookeeperClientImpl(hostname, servers,
-        new zookeeper::interface::ZookeeperCBindings)) {
+        new zookeeper::interface::ZookeeperCBindings, zh, connected)) {
 }
 
 ZookeeperClient::ZookeeperClient(impl::ZookeeperClientImpl *impl) :
@@ -300,6 +335,10 @@ bool ZookeeperClient::DeleteNode(const char *path) {
 
 void ZookeeperClient::Shutdown() {
     return impl_->Shutdown();
+}
+
+bool ZookeeperClient::Reconnect() {
+	return impl_->Reconnect();
 }
 
 ZookeeperClient::~ZookeeperClient() {
