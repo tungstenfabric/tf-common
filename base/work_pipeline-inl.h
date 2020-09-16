@@ -127,7 +127,8 @@ void
 WorkPipeline<T0,T1,T2,T3,T4,T5,T6>::Start(FinFn finFn, const boost::shared_ptr<T0> & inp) {
     inp_ = inp;
     finFn_ = finFn;
-    boost::get<0>(sg_)->Start(0, boost::bind(&SelfT::WorkStageCb,
+    typename boost::tuples::element<0, sg_type>::type g(boost::get<0>(sg_));
+    g->Start(0, boost::bind(&SelfT::WorkStageCb,
         this, 0, _1),inp_);
 }
 
@@ -165,8 +166,9 @@ WorkPipeline<T0,T1,T2,T3,T4,T5,T6>::WorkStageCb(uint32_t stage, bool ret_code) {
         }
         break;            
     case 5: {
-            res_ = boost::get<5>(sg_)->Result();
-            boost::get<5>(sg_)->Release();
+            typename boost::tuples::element<5, sg_type>::type g(boost::get<5>(sg_));
+            res_ = g->Result();
+            g->Release();
             finished_ = true;
             finFn_(true);
         }
@@ -184,7 +186,8 @@ WorkPipeline<T0,T1,T2,T3,T4,T5,T6>::NextStage() {
     boost::get<kS>(sg_)->Release();
     if (boost::get<kS+1>(sg_)) {
         res_.reset();
-        boost::get<kS+1>(sg_)->Start(kS+1, boost::bind(&SelfT::WorkStageCb,
+        typename boost::tuples::element<kS+1, sg_type>::type g(boost::get<kS+1>(sg_));
+        g->Start(kS+1, boost::bind(&SelfT::WorkStageCb,
             this, kS+1, _1),res);
     } else {
         finished_ = true;

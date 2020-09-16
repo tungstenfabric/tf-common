@@ -216,17 +216,19 @@ public:
     boost::shared_ptr<ResT> Result() const;
 
 private:
-    bool finished_;
-    FinFn finFn_;
-    boost::shared_ptr<T0> inp_;
-    boost::shared_ptr<ResT> res_;
-    boost::tuple<
+    typedef boost::tuple<
         const boost::shared_ptr<WorkStageIf<T0,T1> >,
         const boost::shared_ptr<WorkStageIf<T1,T2> >,
         const boost::shared_ptr<WorkStageIf<T2,T3> >,
         const boost::shared_ptr<WorkStageIf<T3,T4> >,
         const boost::shared_ptr<WorkStageIf<T4,T5> >,
-        const boost::shared_ptr<WorkStageIf<T5,T6> > > sg_;
+        const boost::shared_ptr<WorkStageIf<T5,T6> > > sg_type;
+
+    bool finished_;
+    FinFn finFn_;
+    boost::shared_ptr<T0> inp_;
+    boost::shared_ptr<ResT> res_;
+    sg_type sg_;
 
     template<int kS, bool same> struct PipeProceed {};
 
