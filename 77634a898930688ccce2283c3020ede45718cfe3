@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "213e9fda_d5dd0c8e",
+        "filename": "zookeeper/zookeeper_client.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 705
+      },
+      "writtenOn": "2020-09-24T18:03:50Z",
+      "side": 1,
+      "message": "Why are we including this header file here?",
+      "revId": "77634a898930688ccce2283c3020ede45718cfe3",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ffebbe8f_7488d338",
+        "filename": "zookeeper/zookeeper_client.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 705
+      },
+      "writtenOn": "2020-09-24T18:03:50Z",
+      "side": 1,
+      "message": "This callback is specific to anlytics collector. Can you move this callback to analytics?",
+      "revId": "77634a898930688ccce2283c3020ede45718cfe3",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5195eae8_63619c1e",
+        "filename": "zookeeper/zookeeper_client.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 705
+      },
+      "writtenOn": "2020-09-24T18:03:50Z",
+      "side": 1,
+      "message": "Can you add a testcase for this?",
+      "revId": "77634a898930688ccce2283c3020ede45718cfe3",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "45604483_68f818b9",
+        "filename": "zookeeper/zookeeper_client.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 705
+      },
+      "writtenOn": "2020-09-24T18:03:50Z",
+      "side": 1,
+      "message": "Maintain 80 char line in all the places.",
+      "revId": "77634a898930688ccce2283c3020ede45718cfe3",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ac5976fd_8279aacf",
+        "filename": "zookeeper/zookeeper_client.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 705
+      },
+      "writtenOn": "2020-09-24T18:03:50Z",
+      "side": 1,
+      "message": "Please correct indendation.",
+      "revId": "77634a898930688ccce2283c3020ede45718cfe3",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
