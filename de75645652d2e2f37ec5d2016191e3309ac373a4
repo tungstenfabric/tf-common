@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9b5e927c_57dff705",
+        "filename": "io/tcp_server.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 557,
+      "author": {
+        "id": 213
+      },
+      "writtenOn": "2020-09-30T09:59:01Z",
+      "side": 1,
+      "message": "This should be set 1 only if sandesh_config.tcp_keepalive_enable is set. Currently, you are setting it even if config is not enabled.",
+      "range": {
+        "startLine": 557,
+        "startChar": 26,
+        "endLine": 557,
+        "endChar": 33
+      },
+      "revId": "de75645652d2e2f37ec5d2016191e3309ac373a4",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
