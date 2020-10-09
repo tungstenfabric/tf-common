@@ -40,6 +40,8 @@ class ZookeeperMockInterface : public ZookeeperInterface {
         char *buffer, int* buffer_len, struct Stat *stat));
     MOCK_METHOD4(ZooExists, int(zhandle_t *zh, const char *path, int watch,
                                          struct Stat *stat));
+    MOCK_METHOD2(ZooSetContext, void(zhandle_t * zh, void *context));
+    MOCK_METHOD1(ZooIsUnrecoverable, int(zhandle_t * zh));
 };
 
 class ZookeeperClientTest : public ::testing::Test {

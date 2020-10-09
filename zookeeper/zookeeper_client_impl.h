@@ -32,6 +32,8 @@ class ZookeeperClientImpl {
     int GetNodeDataSync(const char *path, char *buf, int *buf_len, int *err);
     int DeleteNodeSync(const char *path, int *err);
     bool CheckNodeExist(const char *path);
+    void SetClient(void *client) {client_ = client;}
+    void *GetClient() {return client_;}
     std::string Name() const;
 
  private:
@@ -41,6 +43,7 @@ class ZookeeperClientImpl {
     std::string servers_;
     zhandle_t *zk_handle_;
     bool connected_;
+    void *client_;
     std::auto_ptr<zookeeper::interface::ZookeeperInterface> zki_;
 };
 
