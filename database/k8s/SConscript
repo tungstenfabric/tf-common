@@ -1,0 +1,29 @@
+#
+# Copyright (c) 2020 Juniper Networks, Inc. All rights reserved.
+#
+
+Import('DbEnv')
+K8sClientEnv = DbEnv.Clone()
+
+K8sClientEnv.Append(CPPPATH = ['/usr/include'])
+K8sClientEnv.Append(CPPPATH = [K8sClientEnv['TOP'] + '/database/k8s'])
+
+local_srcs = ['k8s_client.cc', 'k8s_watcher.cc', 'k8s_url.cc', 'k8s_util.cc']
+
+K8sClientEnv.Append(CXXFLAGS = '-Wall -std=c++11')
+
+gen_files = K8sClientEnv.SandeshGenCpp('k8s.sandesh')
+gen_srcs = K8sClientEnv.ExtractCpp(gen_files)
+
+srcs = local_srcs + gen_srcs
+
+libk8s_client = K8sClientEnv.Library('k8s_client', srcs)
+
+# Target depends on restclient-cpp
+lib_restclient_cpp = File('../../../../build/lib/librestclient-cpp.a')
+inc_restclient_cpp = File('../../../../build/include/restclient-cpp/restclient.h')
+K8sClientEnv.Depends(libk8s_client, lib_restclient_cpp)
+K8sClientEnv.Depends(libk8s_client, inc_restclient_cpp)
+
+K8sClientEnv.Install(K8sClientEnv['TOP_LIB'], libk8s_client)
+K8sClientEnv.SConscript('test/SConscript', exports='K8sClientEnv', duplicate=0)

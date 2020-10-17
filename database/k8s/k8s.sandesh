@@ -1,0 +1,45 @@
+/*
+ * Copyright (c) 2020 Juniper Networks, Inc. All rights reserved.
+ */
+
+/**
+ * @description: Event Trace message for Kubernetes Client
+ * @severity: DEBUG
+ */
+systemlog sandesh K8sDebug {
+    1: string message;
+}
+
+/**
+ * @description: Warning message for Kubernetes Client
+ * @severity: WARNING
+ */
+systemlog sandesh K8sWarning {
+    1: string message;
+}
+
+/**
+ * @description: Event trace message for Kubernetes Client
+ * @severity: DEBUG
+ */
+trace sandesh K8sDebugTrace {
+    1: string message;
+}
+
+/**
+ * @description: Event trace message for Kubernetes Client
+ * @severity: WARNING
+ */
+trace sandesh K8sWarningTrace {
+    1: string message;
+}
+
+/**
+ * @description: Error trace  message for Kubernetes Client
+ * @severity: DEBUG
+ */
+trace sandesh K8sErrorTrace {
+    1: string message;
+    2: u64    err_code;
+    3: string err_msg;
+}
