@@ -10,7 +10,8 @@
 #include "base/autogen_util.h"
 #include "config_client_log_types.h"
 
-ConfigJsonParserBase::ConfigJsonParserBase(){
+ConfigJsonParserBase::ConfigJsonParserBase(IFMapOrigin::Origin db_origin)
+    : db_origin_(db_origin) {
 }
 
 ConfigJsonParserBase::~ConfigJsonParserBase() {

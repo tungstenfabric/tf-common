@@ -29,7 +29,7 @@ class ObjectProcessReq {
 
     std::string oper_;
     std::string uuid_str_;
-    std::string value_; // obj_type for Cassandra/json_value for ETCD
+    std::string value_; // obj_type for Cassandra/json_value for K8S
 
  private:
     DISALLOW_COPY_AND_ASSIGN(ObjectProcessReq);
@@ -60,6 +60,7 @@ public:
     std::string config_db_user() const;
     std::string config_db_password() const;
     std::vector<std::string> config_db_ips() const;
+    const std::vector<int> config_db_ports() const;
     int GetFirstConfigDbPort() const;
     virtual void PostShutdown() = 0;
     virtual void InitDatabase() = 0;
