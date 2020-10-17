@@ -22,7 +22,7 @@ DbEnv.Install(DbEnv['TOP_LIB'], libgendb)
 
 subdirs = ['test',
            'cassandra',
-           'etcd',
+           'k8s',
           ]
 for dir in subdirs:
     DbEnv.SConscript(dir + '/SConscript', exports='DbEnv', duplicate=0)
