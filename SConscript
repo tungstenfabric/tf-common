@@ -75,18 +75,14 @@ BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/boost/asio/ssl/impl',
 
 BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/database',
     '#src/contrail-common/database/gendb_if.h')
-BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/database/etcd',
-    '#src/contrail-common/database/etcd/eql_if.h')
-BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/database/etcd/proto',
-    '#src/contrail-common/database/etcd/proto/auth.pb.h')
-BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/database/etcd/proto',
-    '#src/contrail-common/database/etcd/proto/etcdserver.pb.h')
-BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/database/etcd/proto',
-    '#src/contrail-common/database/etcd/proto/kv.pb.h')
-BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/database/etcd/proto',
-    '#src/contrail-common/database/etcd/proto/rpc.grpc.pb.h')
-BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/database/etcd/proto',
-    '#src/contrail-common/database/etcd/proto/rpc.pb.h')
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/database/k8s',
+    '#src/contrail-common/database/k8s/k8s_client.h')
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/database/k8s',
+    '#src/contrail-common/database/k8s/k8s_watcher.h')
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/database/k8s',
+    '#src/contrail-common/database/k8s/k8s_url.h')
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/database/k8s',
+    '#src/contrail-common/database/k8s/k8s_client_types.h')
 BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/database/cassandra/cql',
     '#src/contrail-common/database/cassandra/cql/cql_if.h')
 BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/database/cassandra/cql',
