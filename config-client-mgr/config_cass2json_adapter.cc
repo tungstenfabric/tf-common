@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Juniper Networks, Inc. All rights reserved.
+ * Copyright (c) 2020 Juniper Networks, Inc. All rights reserved.
  */
 
 #include "config_cass2json_adapter.h"

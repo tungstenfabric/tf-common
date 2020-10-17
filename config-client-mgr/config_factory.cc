@@ -20,16 +20,14 @@ FACTORY_STATIC_REGISTER(ConfigFactory, ConfigCassandraClient,
 #include "config_amqp_client.h"
 FACTORY_STATIC_REGISTER(ConfigFactory, ConfigAmqpChannel, ConfigAmqpChannel);
 
-#ifdef CONTRAIL_ETCD_INCL
-#include "config_etcd_client.h"
-FACTORY_STATIC_REGISTER(ConfigFactory, ConfigEtcdPartition,
-                        ConfigEtcdPartition);
-#include "config_etcd_client.h"
-FACTORY_STATIC_REGISTER(ConfigFactory, ConfigEtcdClient,
-                        ConfigEtcdClient);
-#include "database/etcd/eql_if.h"
-FACTORY_STATIC_REGISTER(ConfigFactory, EtcdIf, EtcdIf);
-#endif
+#include "config_k8s_client.h"
+FACTORY_STATIC_REGISTER(ConfigFactory, ConfigK8sPartition,
+                        ConfigK8sPartition);
+#include "config_k8s_client.h"
+FACTORY_STATIC_REGISTER(ConfigFactory, ConfigK8sClient,
+                        ConfigK8sClient);
+#include "database/k8s/k8s_client.h"
+FACTORY_STATIC_REGISTER(ConfigFactory, K8sClient, K8sClient);
 
 #include "database/cassandra/cql/cql_if.h"
 FACTORY_STATIC_REGISTER(ConfigFactory, CqlIf, CqlIf);
