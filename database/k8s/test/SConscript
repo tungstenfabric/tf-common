@@ -2,12 +2,14 @@
 # Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
 #
 
-Import('EqlIfEnv')
+Import('K8sClientEnv')
 
-env = EqlIfEnv.Clone()
+env = K8sClientEnv.Clone()
 
 env.Append(CPPPATH = env['TOP'])
 env.Append(CPPPATH = [env['TOP'] + '/database'])
+
+env.Append(CXXFLAGS = '-Wno-deprecated-declarations -DGTEST_USE_OWN_TR1_TUPLE=1 -std=c++11')
 
 def MapBuildDir(list):
     return map(lambda x: env['TOP'] + '/' + x, list)
@@ -26,11 +28,10 @@ env.Prepend(LIBS=[  'io',
                     'ssl',
                     'crypto',
                     'gunit',
-                    'etcdql',
-                    'protobuf',
-                    'grpc++',
-                    'grpc',
-                    'z' ])
+                    'boost_regex',
+                    'k8s_client',
+                    'restclient-cpp'
+                    ])
 
 libs = MapBuildDir([
         'xml',
@@ -42,14 +43,14 @@ env.Append(LIBPATH=libs)
 
 env.Prepend(LINKFLAGS=['-Wl,--whole-archive', '-lbase','-Wl,--no-whole-archive' ])
 
-eql_if_test = env.UnitTest('eql_if_test',
-                          ['eql_if_test.cc'])
+k8s_client_test = env.UnitTest('k8s_client_test',
+                              ['k8s_client_test.cc'])
 
 test_suite = []
-test = env.TestSuite('eqlif_test_suite', test_suite)
+test = env.TestSuite('k8s_client_test_suite', test_suite)
 def_env = DefaultEnvironment()
-env.Alias('src/contrail-common/database/etcd/eql:test', test)
+env.Alias('src/contrail-common/database/k8s/k8s_client:test', test)
 
-flaky_test_suite = [ eql_if_test ]
-flaky_test = env.TestSuite('eqlif_flaky_test_suite', flaky_test_suite)
-env.Alias('src/contrail-common/database/etcd/eql:flaky-test', flaky_test)
+flaky_test_suite = [ k8s_client_test ]
+flaky_test = env.TestSuite('k8s_client_flaky_test_suite', flaky_test_suite)
+env.Alias('src/contrail-common/database/k8s/k8s_client:flaky-test', flaky_test)

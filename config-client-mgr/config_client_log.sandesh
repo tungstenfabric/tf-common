@@ -335,10 +335,10 @@ systemlog sandesh ConfigCassInitErrorMessage {
 /**
  * @description: System log for config client module
  * @severity: ERROR
- * @cause: Connection to etcd for config has initialization problems.
+ * @cause: Connection to k8s for config has initialization problems.
  * @action: Contact your technical support representative
  */
-systemlog sandesh ConfigEtcdInitErrorMessage {
+systemlog sandesh ConfigK8sClientInitErrorMessage {
     1: string message
 }
 
@@ -366,7 +366,7 @@ trace sandesh ConfigCassInitErrorMessageTrace {
  * @description: Trace message for config client module
  * @severity: DEBUG
  */
-trace sandesh ConfigEtcdInitErrorMessageTrace {
+trace sandesh ConfigK8sClientInitErrorMessageTrace {
     1: string message
 }
 

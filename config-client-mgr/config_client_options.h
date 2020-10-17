@@ -15,7 +15,7 @@ struct ConfigClientOptions {
         peer_response_wait_time(0),
         config_db_use_ssl(false),
         rabbitmq_use_ssl(false),
-        config_db_use_etcd(false) {
+        config_db_use_k8s(false) {
     }
 
     ConfigClientOptions(const std::string &in_server,
@@ -30,7 +30,7 @@ struct ConfigClientOptions {
           peer_response_wait_time(in_prwt_time),
           config_db_use_ssl(false),
           rabbitmq_use_ssl(false),
-          config_db_use_etcd(false) {
+          config_db_use_k8s(false) {
     }
 
     ConfigClientOptions(const std::string &in_server,
@@ -51,7 +51,7 @@ struct ConfigClientOptions {
           config_db_server_list(cfg_db_server_list),
           config_db_use_ssl(false),
           rabbitmq_use_ssl(false),
-          config_db_use_etcd(false) {
+          config_db_use_k8s(false) {
     }
 
     std::string server_url;
@@ -75,7 +75,7 @@ struct ConfigClientOptions {
     std::string rabbitmq_ssl_keyfile;
     std::string rabbitmq_ssl_certfile;
     std::string rabbitmq_ssl_ca_certs;
-    bool config_db_use_etcd;
+    bool config_db_use_k8s;
 };
 
 #endif /* defined(__CONFIG_CLIENT_OPTIONS_H__) */
