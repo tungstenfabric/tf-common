@@ -14,9 +14,7 @@
 #include "config_amqp_client.h"
 #include "config_db_client.h"
 #include "config_cassandra_client.h"
-#ifdef CONTRAIL_ETCD_INCL
-#include "config_etcd_client.h"
-#endif
+#include "config_k8s_client.h"
 #include "config_client_log.h"
 #include "config_client_log_types.h"
 #include "config_client_show_types.h"
@@ -99,12 +97,12 @@ void ConfigClientManager::SetDefaultSchedulingPolicy() {
     scheduler->SetPolicy(scheduler->GetTaskId("amqp::RabbitMQReader"),
         rabbitmq_reader_policy);
 
-    // Policy for etcd::EtcdWatcher process
-    TaskPolicy etcd_watcher_policy = boost::assign::list_of
-        (TaskExclusion(scheduler->GetTaskId("config_client::Init")));
-    scheduler->SetPolicy(scheduler->GetTaskId("etcd::EtcdWatcher"),
-        etcd_watcher_policy);
-
+    // Policy for k8s::K8sWatcher process
+    TaskPolicy k8s_watcher_policy = boost::assign::list_of
+        (TaskExclusion(scheduler->GetTaskId("config_client::Init")))
+        (TaskExclusion(scheduler->GetTaskId("config_client::DBReader")));
+    scheduler->SetPolicy(scheduler->GetTaskId("k8s::K8sWatcher"),
+        k8s_watcher_policy);
 }
 
 void ConfigClientManager::SetUp() {
@@ -112,12 +110,15 @@ void ConfigClientManager::SetUp() {
     config_json_parser_->Init(this);
     thread_count_ = GetNumConfigReader();
     end_of_rib_computed_at_ = UTCTimestampUsec();
-    if (config_options_.config_db_use_etcd) {
-#ifdef CONTRAIL_ETCD_INCL
-        config_db_client_.reset(ConfigFactory::Create<ConfigEtcdClient>
+    if (config_options_.config_db_use_k8s) {
+        config_db_client_.reset(ConfigFactory::Create<ConfigK8sClient>
                                 (this, evm_, config_options_,
                                  thread_count_));
-#endif
+        // TODO: Doing this makes logging more correct, but IFMap has hard-coded
+        //       logic that expects IFMapOrigin::CASSANDRA that is hard to replace.
+        //       It will be easiest to just remove Cassandra and RabbitMQ support
+        //       altogether.
+        // config_json_parser_->SetDbOrigin(IFMapOrigin::K8S);
     } else {
         config_db_client_.reset(
                 ConfigFactory::Create<ConfigCassandraClient>(this, evm_,
@@ -240,12 +241,10 @@ void ConfigClientManager::PostShutdown() {
     // Create new config db client and amqp client
     // Delete of config db client object guarantees the flusing of
     // object uuid cache and uuid read request list.
-    if (config_options_.config_db_use_etcd) {
-#ifdef CONTRAIL_ETCD_INCL
-        config_db_client_.reset(ConfigFactory::Create<ConfigEtcdClient>
+    if (config_options_.config_db_use_k8s) {
+        config_db_client_.reset(ConfigFactory::Create<ConfigK8sClient>
                                 (this, evm_, config_options_,
                                  thread_count_));
-#endif
     } else {
         config_db_client_.reset(ConfigFactory::Create<ConfigCassandraClient>
                                 (this, evm_, config_options_,
@@ -284,22 +283,25 @@ bool ConfigClientManager::InitConfigClient() {
     }
 
     // Common code path for both init/reinit
-    if (config_options_.config_db_use_etcd) {
-#ifdef CONTRAIL_ETCD_INCL
+    if (config_options_.config_db_use_k8s) {
+        // For do the bulk gets first.
         CONFIG_CLIENT_DEBUG(ConfigClientMgrDebug,
-            "Config Client Mgr SM: Start ETCD Watcher");
+            "Config Client Mgr SM: Init Database");
+        config_db_client_->InitDatabase();
+        // Then start the watch threads.
+        CONFIG_CLIENT_DEBUG(ConfigClientMgrDebug,
+            "Config Client Mgr SM: Start K8S Watcher");
         config_db_client_->StartWatcher();
-#endif
     } else {
         CONFIG_CLIENT_DEBUG(ConfigClientMgrDebug,
             "Config Client Mgr SM: Start RabbitMqReader and init Database");
         config_amqp_client_->StartRabbitMQReader();
+
+        CONFIG_CLIENT_DEBUG(ConfigClientMgrDebug,
+            "Config Client Mgr SM: Init Database");
+        config_db_client_->InitDatabase();
     }
 
-    CONFIG_CLIENT_DEBUG(ConfigClientMgrDebug,
-            "Config Client Mgr SM: Init Database");
-
-    config_db_client_->InitDatabase();
     if (is_reinit_triggered()) return false;
     return true;
 }
