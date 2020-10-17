@@ -13,6 +13,7 @@
 #include "config_cass2json_adapter.h"
 #include "config_client_manager.h"
 #include "base/queue_task.h"
+#include "ifmap/ifmap_origin.h"
 
 #include "rapidjson/document.h"
 
@@ -28,7 +29,7 @@ public:
     typedef std::map<LinkMemberPair, LinkDataPair> LinkNameMap;
     typedef std::map<std::string, std::string> WrapperFieldMap;
 
-    ConfigJsonParserBase();
+    ConfigJsonParserBase(IFMapOrigin::Origin db_origin = IFMapOrigin::CASSANDRA);
     virtual ~ConfigJsonParserBase();
     // This fucntion is used to setup object graphy concerned
     // by user, please follow the step:
@@ -91,6 +92,10 @@ public:
 
     bool IsListOrMapPropEmpty(const std::string &uuid_key,
                            const std::string &lookup_key) const;
+
+    IFMapOrigin::Origin GetDbOrigin() const { return db_origin_; }
+    void SetDbOrigin(IFMapOrigin::Origin db_origin) { db_origin_ = db_origin; }
+
 private:
     ConfigClientManager *mgr_;
     LinkNameMap link_name_map_;
@@ -98,6 +103,8 @@ private:
 
     WrapperFieldMap wrapper_field_map_;
     ObjectTypeList obj_type_to_read_;
+
+    IFMapOrigin::Origin db_origin_;
 };
 
 #endif // ctrlplane_config_json_parser_h
