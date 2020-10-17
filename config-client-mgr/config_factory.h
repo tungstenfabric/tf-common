@@ -13,14 +13,15 @@
 namespace cass { namespace cql { class CqlIf; } }
 using cass::cql::CqlIf;
 
-namespace etcd { namespace etcdql { class EtcdIf; } }
-using etcd::etcdql::EtcdIf;
+namespace k8s { namespace client { class K8sUrl; class K8sClient; } }
+using k8s::client::K8sUrl;
+using k8s::client::K8sClient;
 
 class ConfigAmqpChannel;
 class ConfigCassandraClient;
 class ConfigCassandraPartition;
-class ConfigEtcdClient;
-class ConfigEtcdPartition;
+class ConfigK8sClient;
+class ConfigK8sPartition;
 class ConfigClientManager;
 class ConfigJsonParserBase;
 struct ConfigClientOptions;
@@ -37,14 +38,16 @@ class ConfigFactory : public Factory<ConfigFactory> {
     FACTORY_TYPE_N7(ConfigFactory, CqlIf, EventManager *,
                     const std::vector<std::string> &, int, const std::string &,
                     const std::string &, bool, const std::string &);
-    FACTORY_TYPE_N4(ConfigFactory, ConfigEtcdClient, ConfigClientManager *,
+    FACTORY_TYPE_N4(ConfigFactory, ConfigK8sClient, ConfigClientManager *,
                     EventManager *, const ConfigClientOptions &,
                     int);
-    FACTORY_TYPE_N2(ConfigFactory, ConfigEtcdPartition,
-                    ConfigEtcdClient *, size_t);
-    FACTORY_TYPE_N3(ConfigFactory, EtcdIf,
-                    const std::vector<std::string> &,
-                    const int, bool);
+    FACTORY_TYPE_N2(ConfigFactory, ConfigK8sPartition,
+                    ConfigK8sClient *, size_t);
+    FACTORY_TYPE_N4(ConfigFactory, K8sClient,
+                    const std::vector<K8sUrl> &,
+                    const std::string &,
+                    size_t,
+                    size_t);
 };
 
 #endif  // __CONFIG__CONFIG_FACTORY_H__
