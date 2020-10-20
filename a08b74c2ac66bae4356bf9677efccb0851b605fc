@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "edad6468_8c42306b",
+        "filename": "zookeeper/zookeeper_client.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 752
+      },
+      "writtenOn": "2020-10-20T06:37:11Z",
+      "side": 1,
+      "message": "Minor comment - Do not use is_unrecoverable zookeeper api directly. Use ZooIsUnrecoverable instead.",
+      "revId": "a08b74c2ac66bae4356bf9677efccb0851b605fc",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
