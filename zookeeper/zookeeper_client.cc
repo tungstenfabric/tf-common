@@ -66,12 +66,31 @@ class ZookeeperCBindings : public ZookeeperInterface {
                                          struct Stat *stat) {
         return zoo_exists(zh, path, watch, stat);
     }
+    virtual void ZooSetContext(zhandle_t * zh, void *context) {
+        return zoo_set_context(zh, context);
+    }
+    virtual int ZooIsUnrecoverable(zhandle_t * zh) {
+        return is_unrecoverable(zh);
+    }
 };
 
 } // namespace interface
 
 namespace client {
 namespace impl {
+
+void ZookeeperWatcher(zhandle_t* zh, int type, int state,
+        const char* path, void* watcherCtx) {
+    if (ZINVALIDSTATE == is_unrecoverable(zh)) {
+        ZOO_LOG(DEBUG, "Zookeeper callback called with state " << state);
+        ZookeeperClientImpl *zooImpl = (ZookeeperClientImpl *)watcherCtx;
+        if (zooImpl && zooImpl->GetClient()) {
+            if (((ZookeeperClient *)zooImpl->GetClient())->cb) {
+                ((ZookeeperClient *)zooImpl->GetClient())->cb();
+            }
+        }
+    }
+}
 
 // ZookeeperClientImpl
 ZookeeperClientImpl::ZookeeperClientImpl(const char *hostname,
@@ -91,7 +110,7 @@ ZookeeperClientImpl::~ZookeeperClientImpl() {
 bool ZookeeperClientImpl::Connect() {
     while (true) {
         zk_handle_ = zki_->ZookeeperInit(servers_.c_str(),
-                                         NULL,
+                                         ZookeeperWatcher,
                                          kSessionTimeoutMSec_,
                                          NULL,
                                          NULL,
@@ -103,6 +122,7 @@ bool ZookeeperClientImpl::Connect() {
             sleep(1);
             continue;
         }
+        zki_->ZooSetContext(zk_handle_, this);
         // Block till session is connected
         while (!connected_) {
             int zstate(zki_->ZooState(zk_handle_));
@@ -300,6 +320,13 @@ bool ZookeeperClient::DeleteNode(const char *path) {
 
 void ZookeeperClient::Shutdown() {
     return impl_->Shutdown();
+}
+
+void ZookeeperClient::AddListener(ZooStateCallback callback) {
+    cb = callback;
+    if (impl_.get()) {
+        impl_->SetClient(this);
+    }
 }
 
 ZookeeperClient::~ZookeeperClient() {

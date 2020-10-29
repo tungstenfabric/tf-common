@@ -27,6 +27,8 @@ class ZookeeperInterface {
         char *buffer, int* buffer_len, struct Stat *stat) = 0;
     virtual int ZooExists(zhandle_t *zh, const char *path, int watch,
                                          struct Stat *stat) = 0;
+    virtual void ZooSetContext(zhandle_t * zh, void *context) = 0;
+    virtual int ZooIsUnrecoverable(zhandle_t * zh) = 0;
 };
 
 } // namespace interface
