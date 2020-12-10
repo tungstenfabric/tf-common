@@ -8,6 +8,9 @@
 #include <string>
 #include <vector>
 
+#include <sys/types.h>
+#include <sys/socket.h>
+
 #include <boost/asio/ip/tcp.hpp>
 
 #include <SimpleAmqpClient/SimpleAmqpClient.h>
@@ -77,6 +80,35 @@ public:
         channel_->BasicAck(message);
     }
 
+    /*
+    virtual int GetSocketFD() const {
+        return channel_->GetSocketFD(); 
+    }
+    */
+
+    void EnableKeepalive(int rabbitmq_tcp_keepalive_time, int rabbitmq_tcp_keepalive_interval, int rabbitmq_tcp_keepalive_probes) {
+        int sfd, flags;
+
+        sfd = channel_->GetSocketFD();
+
+        // enable tcp keepalive
+        flags = 1;
+        setsocketopt(sfd, SOL_SOCKET, SO_KEEPALIVE, (void *) &flags, sizeof(flags));
+
+        // set keepalive time
+        flags = rabbitmq_tcp_keepalive_time;
+        setsocketopt(sfd, SOL_TCP, TCP_KEEPIDLE, (void *) &flags, sizeof(flags));
+
+        // set keeaplive interval
+        flags = rabbitmq_tcp_keepalive_interval;
+        setsocketopt(sfd, SOL_TCP, TCP_KEEPINTVL, (void *) &flags, sizeof(flags));
+
+        // set keeaplive probes
+        flags = rabbitmq_tcp_keepalive_probes;
+        setsocketopt(sfd, SOL_TCP, TCP_KEEPCNT, (void *) &flags, sizeof(flags));
+    }
+ 
+
 private:
     AmqpClient::Channel::ptr_t channel_;
 };
@@ -124,6 +156,9 @@ public:
     std::string rabbitmq_ssl_keyfile() const { return rabbitmq_ssl_keyfile_; }
     std::string rabbitmq_ssl_certfile() const { return rabbitmq_ssl_certfile_; }
     std::string rabbitmq_ssl_ca_certs() const { return rabbitmq_ssl_ca_certs_; }
+    std::string rabbitmq_tcp_keepalive_time() const { return rabbitmq_tcp_keepalive_time_; }
+    std::string rabbitmq_tcp_keepalive_interval() const { return rabbitmq_tcp_keepalive_interval_; }
+    std::string rabbitmq_tcp_keepalive_probes() const { return rabbitmq_tcp_keepalive_probes_; }
     ConfigClientManager *config_manager() const { return mgr_; }
     ConfigClientManager *config_manager() { return mgr_; }
     std::vector<Endpoint> endpoints() const { return endpoints_; }
@@ -166,6 +201,9 @@ private:
     std::string rabbitmq_ssl_keyfile_;
     std::string rabbitmq_ssl_certfile_;
     std::string rabbitmq_ssl_ca_certs_;
+    std::string rabbitmq_tcp_keepalive_time_;
+    std::string rabbitmq_tcp_keepalive_interval_;
+    std::string rabbitmq_tcp_keepalive_probes_;
     static bool disable_;
     std::vector<Endpoint> endpoints_;
     tbb::atomic<bool> connection_status_;

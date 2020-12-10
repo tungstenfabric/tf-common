@@ -192,6 +192,11 @@ void ConfigAmqpClient::RabbitMQReader::ConnectToRabbitMQ(bool queue_delete) {
             } else {
                 channel_->CreateFromUri(uri);
             }
+            // Enable TCP keepalive
+            channel_->EnableKeepalive(
+                amqpclient_->rabbitmq_tcp_keepalive_time(),
+                amqpclient_->rabbitmq_tcp_keepalive_interval(),
+                amqpclient_->rabbitmq_tcp_keepalive_probes());
             // passive = false, durable = false, auto_delete = false
             channel_->DeclareExchange("vnc_config.object-update",
               AmqpClient::Channel::EXCHANGE_TYPE_FANOUT, false, false, false);

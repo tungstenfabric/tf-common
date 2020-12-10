@@ -75,6 +75,9 @@ struct ConfigClientOptions {
     std::string rabbitmq_ssl_keyfile;
     std::string rabbitmq_ssl_certfile;
     std::string rabbitmq_ssl_ca_certs;
+    int rabbitmq_tcp_keepalive_time;
+    int rabbitmq_tcp_keepalive_interval;
+    int rabbitmq_tcp_keepalive_probes;
     bool config_db_use_etcd;
 };
 
