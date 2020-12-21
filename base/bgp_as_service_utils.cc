@@ -35,7 +35,7 @@ BGPaaSUtils::BgpAsServicePortIndexPair BGPaaSUtils::DecodeBgpaasServicePort(
     size_t   index = 0;
     uint32_t original_sport;
 
-    if (!port_range_start || !port_range_end) {
+    if (!port_range_start || !port_range_end || sport < port_range_start) {
         return std::make_pair(sport, index);
     }
 
