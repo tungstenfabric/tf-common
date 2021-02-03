@@ -82,7 +82,7 @@ class PartitionClient(object):
 
         # connect to zookeeper
         while True:
-            self._logger.error("Libpartition zk start")
+            self._logger.info("Libpartition zk start")
             self._zk = KazooClient(zk_server, timeout=60.0)
             self._zk.add_listener(self._zk_listen)
             try:
@@ -117,7 +117,7 @@ class PartitionClient(object):
         # initialize partition # to lock acquire greenlet dictionary
         self._part_lock_task_dict = {}
        
-        self._logger.error("initial servers:" + str(self._cluster_list))
+        self._logger.info("initial servers:" + str(self._cluster_list))
 
         # update target partition ownership list
         for part in range(0, self._max_partition):
@@ -143,13 +143,13 @@ class PartitionClient(object):
         if (self._conn_state and self._conn_state != new_conn_state and
                 new_conn_state == ConnectionStatus.UP):
             msg = 'Connection to Zookeeper ESTABLISHED'
-            self._logger.error(msg)
+            self._logger.info(msg)
 
         self._conn_state = new_conn_state
     # end _sandesh_connection_info_update
 
     def _zk_listen(self, state):
-        self._logger.error("Libpartition listen %s" % str(state))
+        self._logger.info("Libpartition listen %s" % str(state))
         if state == KazooState.CONNECTED:
             # Update connection info
             self._sandesh_connection_info_update(status='UP', message='')
@@ -178,7 +178,7 @@ class PartitionClient(object):
             while True:
                 ret = l.acquire(blocking=False)
                 if ret == True:
-                    self._logger.error("Acquired lock for:" + str(part))
+                    self._logger.info("Acquired lock for:" + str(part))
                     self._curr_part_ownership_list.append(part)
                     self._update_cb(self._curr_part_ownership_list)
                     return True
@@ -239,7 +239,7 @@ class PartitionClient(object):
                                 " acquire:" + str(part))
                         del self._part_lock_task_dict[part]
 
-                    self._logger.error("Starting greenlet running to" 
+                    self._logger.info("Starting greenlet running to" 
                             " acquire:" + str(part))
                     # launch the greenlet to acquire the loc, k
                     g = Greenlet.spawn(self._acquire_lock, part)
@@ -305,10 +305,10 @@ class PartitionClient(object):
 
         # update the hash structure
         if new_servers:
-            self._logger.error("new servers:" + str(new_servers))
+            self._logger.info("new servers:" + str(new_servers))
             self._con_hash.add_nodes(new_servers)
         if deleted_servers:
-            self._logger.error("deleted servers:" + str(deleted_servers))
+            self._logger.info("deleted servers:" + str(deleted_servers))
             self._con_hash.del_nodes(deleted_servers)
 
         # update target partition ownership list
@@ -343,28 +343,28 @@ class PartitionClient(object):
         # clean up greenlets
         for part in list(self._part_lock_task_dict.keys()):
             try:
-                self._logger.error("libpartition greenlet cleanup %s" % str(part))
+                self._logger.info("libpartition greenlet cleanup %s" % str(part))
                 self._part_lock_task_dict[part].kill()
             except:
                 pass
 
         self._zk.remove_listener(self._zk_listen)
         gevent.sleep(1)
-        self._logger.error("Stopping libpartition")
+        self._logger.info("Stopping libpartition")
         # close zookeeper
         try:
             self._zk.stop()
         except:
             self._logger.error("Stopping libpartition failed")
         else:
-            self._logger.error("Stopping libpartition successful")
+            self._logger.info("Stopping libpartition successful")
 
-        self._logger.error("Closing libpartition")
+        self._logger.info("Closing libpartition")
         try:
             self._zk.close()
         except:
             self._logger.error("Closing libpartition failed")
         else:
-            self._logger.error("Closing libpartition successful")
+            self._logger.info("Closing libpartition successful")
 
     #end close

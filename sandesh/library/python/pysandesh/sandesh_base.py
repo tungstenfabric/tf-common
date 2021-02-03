@@ -360,8 +360,8 @@ class Sandesh(object):
             self._logger.error('Cannot write %s_port %d to %s'
                                % (name, port, pipe_name))
         else:
-            self._logger.error('Writing %s_port %d to %s'
-                               % (name, port, pipe_name))
+            self._logger.info('Writing %s_port %d to %s'
+                              % (name, port, pipe_name))
             os.write(pipeout, ('%d\n' % port).encode())
             os.close(pipeout)
 
