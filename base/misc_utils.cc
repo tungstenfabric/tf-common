@@ -18,7 +18,7 @@
 
 using namespace std;
 
-const std::string MiscUtils::ContrailVersionCmd = "/usr/bin/contrail-version";
+const std::string MiscUtils::ContrailVersionCmd = "/opt/contrail/utils/contrail-version";
 
 const map<MiscUtils::BuildModule, string> MiscUtils::BuildModuleNames =
     MiscUtils::MapInit();
