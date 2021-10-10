@@ -2,8 +2,9 @@
 # Copyright (c) 2017 Juniper Networks, Inc. All rights reserved.
 #
 
-import sys
 import platform
+import subprocess
+import sys
 
 subdirs = [
     'base',
@@ -33,6 +34,14 @@ common.Append(LIBPATH = libpath)
 common.Prepend(LIBS = libs)
 
 common.Append(CCFLAGS = ['-Wall', '-Werror', '-Wsign-compare'])
+
+gpp_version = subprocess.check_output(
+    "g++ --version | grep g++ | awk '{print $3}'",
+    shell=True).rstrip()
+gpp_version_major = int(gpp_version.split(".")[0])
+if gpp_version_major >= 8:
+    # auto_ptr is depricated - dont error on deprication warnings
+    common.Append(CCFLAGS = ['-Wno-error=deprecated-declarations', '-Wno-deprecated-declarations'])
 
 if not sys.platform.startswith('darwin'):
     if platform.system().startswith('Linux'):
@@ -68,10 +77,12 @@ BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/http',
 BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/zookeeper',
     '#src/contrail-common/zookeeper/zookeeper_client.h')
 
-BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/boost/asio/ssl',
-    '#third_party/boost_1_53_tlsv12_fix/context_base.hpp')
-BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/boost/asio/ssl/impl',
-    '#third_party/boost_1_53_tlsv12_fix/context.ipp')
+# in ubi8 boost is 1.66, no needs in backported patch from 1.58
+if gpp_version_major < 8:
+    BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/boost/asio/ssl',
+        '#third_party/boost_1_53_tlsv12_fix/context_base.hpp')
+    BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/boost/asio/ssl/impl',
+        '#third_party/boost_1_53_tlsv12_fix/context.ipp')
 
 BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/database',
     '#src/contrail-common/database/gendb_if.h')

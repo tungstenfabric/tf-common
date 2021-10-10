@@ -208,7 +208,6 @@ public:
             if (!cmap_.find(a, git->first)) continue;
             typename uve_table_map::iterator uit = a->second.begin();
             while (uit != a->second.end()) {
-                typename uve_table_map::iterator dit = a->second.end();
                 SANDESH_LOG(INFO, __func__ << " Clearing " << uit->first <<
                     " val " << uit->second->data.log() << " proxy " <<
                     SandeshStructProxyTrait<U>::get(uit->second->data) <<
