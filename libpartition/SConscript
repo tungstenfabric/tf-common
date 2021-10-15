@@ -29,11 +29,14 @@ local_sources = [
 local_sources_rules = []
 for file in local_sources:
     local_sources_rules.append(PartEnv.Install(Dir("libpartition"), file))
-    
+
 sdist_depends = [setup_sources_rules, local_sources_rules]
 
 cd_cmd = 'cd ' + Dir('.').path + ' && '
-sdist_gen = PartEnv.Command('dist/libpartition-0.1dev.tar.gz', 'setup.py', cd_cmd + 'python setup.py sdist')
+sdist_gen = PartEnv.Command(
+    'dist/libpartition-%s.tar.gz' % PartEnv.GetPyVersion(),
+    'setup.py',
+    cd_cmd + 'python setup.py sdist')
 # install everything before building distribution
 PartEnv.Depends(sdist_gen, sdist_depends)
 
