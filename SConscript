@@ -42,6 +42,7 @@ gpp_version_major = int(gpp_version.split(".")[0])
 if gpp_version_major >= 8:
     # auto_ptr is depricated - dont error on deprication warnings
     common.Append(CCFLAGS = ['-Wno-error=deprecated-declarations', '-Wno-deprecated-declarations'])
+    common.Append(CCFLAGS = ['-Wno-error=nonnull-compare', '-Wno-nonnull-compare'])
 
 if not sys.platform.startswith('darwin'):
     if platform.system().startswith('Linux'):
