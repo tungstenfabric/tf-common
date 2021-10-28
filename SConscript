@@ -78,12 +78,10 @@ BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/http',
 BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/zookeeper',
     '#src/contrail-common/zookeeper/zookeeper_client.h')
 
-# in ubi8 boost is 1.66, no needs in backported patch from 1.58
-if gpp_version_major < 8:
-    BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/boost/asio/ssl',
-        '#third_party/boost_1_53_tlsv12_fix/context_base.hpp')
-    BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/boost/asio/ssl/impl',
-        '#third_party/boost_1_53_tlsv12_fix/context.ipp')
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/boost/asio/ssl',
+    '#third_party/boost_1_53_tlsv12_fix/context_base.hpp')
+BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/boost/asio/ssl/impl',
+    '#third_party/boost_1_53_tlsv12_fix/context.ipp')
 
 BuildEnv.Install(BuildEnv['TOP_INCLUDE'] + '/database',
     '#src/contrail-common/database/gendb_if.h')

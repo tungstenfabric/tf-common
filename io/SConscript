@@ -48,23 +48,21 @@ gpp_version = subprocess.check_output(
     shell=True).rstrip()
 gpp_version_major = int(gpp_version.split(".")[0])
 
-# in ubi8 boost is 1.66, no needs in backported patch from 1.58
-if gpp_version_major < 8:
-    create_boost_ssl_dir =  env.Command("create_boost_ssl_dir", [],
-                                    Mkdir(src_root + '/build/include/boost/asio/ssl/'))
-    create_boost_ssl_impl_dir = env.Command("create_boost_ssl_impl_dir", [],
-                                    Mkdir(src_root + '/build/include/boost/asio/ssl/impl/'))
-    cp_boost_context =  env.Command("cp_boost_context", [],
-                                    Copy(src_root + '/build/include/boost/asio/ssl/impl/',
-                                    src_root + "/third_party/boost_1_53_tlsv12_fix/context.ipp"))
-    cp_boost_context_base =  env.Command("cp_boost_context_base", [],
-                                    Copy(src_root + '/build/include/boost/asio/ssl/',
-                                    src_root + "/third_party/boost_1_53_tlsv12_fix/context_base.hpp"))
+create_boost_ssl_dir =  env.Command("create_boost_ssl_dir", [],
+                                Mkdir(src_root + '/build/include/boost/asio/ssl/'))
+create_boost_ssl_impl_dir = env.Command("create_boost_ssl_impl_dir", [],
+                                Mkdir(src_root + '/build/include/boost/asio/ssl/impl/'))
+cp_boost_context =  env.Command("cp_boost_context", [],
+                                Copy(src_root + '/build/include/boost/asio/ssl/impl/',
+                                src_root + "/third_party/boost_1_53_tlsv12_fix/context.ipp"))
+cp_boost_context_base =  env.Command("cp_boost_context_base", [],
+                                Copy(src_root + '/build/include/boost/asio/ssl/',
+                                src_root + "/third_party/boost_1_53_tlsv12_fix/context_base.hpp"))
 
-    env.Depends(cp_boost_context, create_boost_ssl_impl_dir)
-    env.Depends(cp_boost_context_base, create_boost_ssl_dir)
-    env.Depends(SslServerSrc, cp_boost_context)
-    env.Depends(SslServerSrc, cp_boost_context_base)
+env.Depends(cp_boost_context, create_boost_ssl_impl_dir)
+env.Depends(cp_boost_context_base, create_boost_ssl_dir)
+env.Depends(SslServerSrc, cp_boost_context)
+env.Depends(SslServerSrc, cp_boost_context_base)
 
 # IO
 contrail_common_io_doc_files = []
