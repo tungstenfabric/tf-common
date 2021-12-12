@@ -386,7 +386,7 @@ class ZookeeperLock::ZookeeperLockImpl {
                         is_acquired_ = true;
                         return true;
                     }
-                    ZOO_LOG(INFO, "EEXIST (" << path_ << "): " << mid <<
+                    ZOO_LOG_ERR("EEXIST (" << path_ << "): " << mid <<
                         " , ours: " << id_);
                     sleep(1);
                     continue;
