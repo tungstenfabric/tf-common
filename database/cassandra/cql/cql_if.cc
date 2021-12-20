@@ -1862,6 +1862,17 @@ CqlIfImpl::CqlIfImpl(EventManager *evm,
     // Set session state to INIT
     session_state_ = SessionState::INIT;
     schema_session_state_ = SessionState::INIT;
+    
+    if (cassandra_ips.size() > 0) {
+        schema_contact_point_ = cassandra_ips[0];
+        boost::system::error_code ec;
+        boost::asio::ip::address::from_string(cassandra_ips[0], ec);
+        if(ec.value() != 0){
+            schema_contact_point_ = GetHostIp(
+                         evm->io_service(), cassandra_ips[0]);
+        }
+    }
+
     if (use_ssl) {
         ssl_ = impl::CassSslPtr(cci->CassSslNew(), cci_);
         /* Only verify the certification and not the identity */
@@ -2276,6 +2287,10 @@ bool CqlIfImpl::ConnectSchemaSync() {
     impl::CassSessionPtr schema_session(cci_->CassSessionNew(), cci_);
     schema_session_.swap(schema_session);
 
+    // First set the cluster whitelist filtering to just one node
+    cci_->CassClusterSetWhitelistFiltering(cluster_.get(),
+           schema_contact_point_.c_str());
+
     impl::CassFuturePtr future(cci_->CassSessionConnect(schema_session_.get(),
         cluster_.get()), cci_);
     bool success(impl::SyncFutureWait(cci_, future.get()));
@@ -2285,6 +2300,8 @@ bool CqlIfImpl::ConnectSchemaSync() {
     } else {
         CQLIF_ERR_TRACE("ConnectSchemaSync FAILED");
     }
+
+    cci_->CassClusterSetWhitelistFiltering(cluster_.get(), "");
     return success;
 }
 
