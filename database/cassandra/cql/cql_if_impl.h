@@ -342,6 +342,7 @@ class CqlIfImpl {
     impl::CassSessionPtr schema_session_;
     tbb::atomic<SessionState::type> session_state_;
     tbb::atomic<SessionState::type> schema_session_state_;
+    std::string schema_contact_point_;
     std::string keyspace_;
     int io_thread_count_;
     typedef boost::unordered_map<std::string, impl::CassPreparedPtr>
