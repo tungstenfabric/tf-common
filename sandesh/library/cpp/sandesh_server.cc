@@ -94,14 +94,14 @@ SandeshServer::SandeshServer(EventManager *evm, const SandeshConfig &config)
             }
         }
         // Server certificate
-        ctx->use_certificate_chain_file(config.certfile, ec);
+        ctx->use_certificate_chain_file(config.server_certfile, ec);
         if (ec.value() != 0) {
             SANDESH_LOG(ERROR, "Error using server certificate: " <<
                         ec.message());
             exit(EINVAL);
         }
         // Server private key
-        ctx->use_private_key_file(config.keyfile,
+        ctx->use_private_key_file(config.server_keyfile,
                                   boost::asio::ssl::context::pem, ec);
         if (ec.value() != 0) {
             SANDESH_LOG(ERROR, "Error using server private key file: " <<
