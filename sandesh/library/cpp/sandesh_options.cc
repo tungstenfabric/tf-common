@@ -22,6 +22,12 @@ void AddOptions(opt::options_description *sandesh_options,
         ("SANDESH.sandesh_certfile", opt::value<std::string>()->default_value(
          "/etc/contrail/ssl/certs/server.pem"),
          "Sandesh SSL certificate")
+        ("SANDESH.sandesh_server_keyfile", opt::value<std::string>()->default_value(
+         "/etc/contrail/ssl/private/server-privkey.pem"),
+         "Sandesh SSL Server private key")
+        ("SANDESH.sandesh_server_certfile", opt::value<std::string>()->default_value(
+         "/etc/contrail/ssl/certs/server.pem"),
+         "Sandesh SSL Server certificate")
         ("SANDESH.sandesh_ca_cert", opt::value<std::string>()->default_value(
          "/etc/contrail/ssl/certs/ca-cert.pem"),
          "Sandesh CA SSL certificate")
@@ -69,6 +75,10 @@ void ProcessOptions(const opt::variables_map &var_map,
                         "SANDESH.sandesh_keyfile");
     GetOptValue<std::string>(var_map, sandesh_config->certfile,
                         "SANDESH.sandesh_certfile");
+    GetOptValue<std::string>(var_map, sandesh_config->server_keyfile,
+                        "SANDESH.sandesh_server_keyfile");
+    GetOptValue<std::string>(var_map, sandesh_config->server_certfile,
+                        "SANDESH.sandesh_server_certfile");
     GetOptValue<std::string>(var_map, sandesh_config->ca_cert,
                         "SANDESH.sandesh_ca_cert");
     GetOptValue<bool>(var_map, sandesh_config->sandesh_ssl_enable,
