@@ -14,6 +14,8 @@ struct SandeshConfig {
         http_server_ip(),
         keyfile(),
         certfile(),
+        server_keyfile(),
+        server_certfile(),
         ca_cert(),
         stats_collector(),
         sandesh_ssl_enable(false),
@@ -33,6 +35,8 @@ struct SandeshConfig {
     std::string http_server_ip;
     std::string keyfile;
     std::string certfile;
+    std::string server_keyfile;
+    std::string server_certfile;
     std::string ca_cert;
     std::string stats_collector;
     bool sandesh_ssl_enable;

@@ -48,6 +48,8 @@ class SandeshConfig(object):
             http_server_ip=None,
             keyfile=None,
             certfile=None,
+            server_keyfile=None,
+            server_certfile=None,
             ca_cert=None,
             sandesh_ssl_enable=False,
             introspect_ssl_enable=False,
@@ -63,6 +65,8 @@ class SandeshConfig(object):
         self.http_server_ip = http_server_ip
         self.keyfile = keyfile
         self.certfile = certfile
+        self.server_keyfile = server_keyfile
+        self.server_certfile = server_certfile
         self.ca_cert = ca_cert
         self.sandesh_ssl_enable = sandesh_ssl_enable
         self.introspect_ssl_enable = introspect_ssl_enable
@@ -86,6 +90,10 @@ class SandeshConfig(object):
                     'sandesh_keyfile':
                         '/etc/contrail/ssl/private/server-privkey.pem',
                     'sandesh_certfile':
+                        '/etc/contrail/ssl/certs/server.pem',
+                    'sandesh_server_keyfile':
+                        '/etc/contrail/ssl/private/server-privkey.pem',
+                    'sandesh_server_certfile':
                         '/etc/contrail/ssl/certs/server.pem',
                     'sandesh_ca_cert':
                         '/etc/contrail/ssl/certs/ca-cert.pem',
@@ -122,6 +130,12 @@ class SandeshConfig(object):
            certfile=parser_args.sandesh_certfile if parser_args and
            parser_args.sandesh_certfile else
            default_opts['sandesh_certfile'],
+           server_keyfile=parser_args.sandesh_server_keyfile if parser_args and
+           parser_args.sandesh_server_keyfile else
+           default_opts['sandesh_server_keyfile'],
+           server_certfile=parser_args.sandesh_server_certfile if
+           parser_args and parser_args.sandesh_server_certfile else
+           default_opts['sandesh_server_certfile'],
            ca_cert=parser_args.sandesh_ca_cert if parser_args and
            parser_args.sandesh_ca_cert else
            default_opts['sandesh_ca_cert'],
@@ -169,6 +183,10 @@ class SandeshConfig(object):
                             help="Sandesh SSL private key")
         parser.add_argument("--sandesh_certfile",
                             help="Sandesh SSL certificate")
+        parser.add_argument("--sandesh_server_keyfile",
+                            help="Sandesh SSL Server private key")
+        parser.add_argument("--sandesh_server_certfile",
+                            help="Sandesh SSL Server certificate")
         parser.add_argument("--sandesh_ca_cert",
                             help="Sandesh CA SSL certificate")
         parser.add_argument("--sandesh_ssl_enable", action="store_true",
