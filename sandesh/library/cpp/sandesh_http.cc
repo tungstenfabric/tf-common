@@ -78,7 +78,7 @@ enum HttpXMLState {
 //   context : handle to Session on which to send bytestream
 //   buf : Buffer that contains XML payload
 //   len : length of buffer
-//   name : Name of Sandesh Module  
+//   name : Name of Sandesh Module
 //   more : This is true if there is more content coming for this response
 //
 static void
@@ -106,7 +106,7 @@ HttpSendXML(const std::string& context, const u_int8_t * buf, uint32_t len,
     tbb::mutex::scoped_lock lock(hmutex);
     std::string client_ctx;
     seq++;
-   
+
     client_ctx = HttpSession::get_client_context(context);
     HttpXMLState state;
 
@@ -121,7 +121,7 @@ HttpSendXML(const std::string& context, const u_int8_t * buf, uint32_t len,
         if (!HttpSession::set_client_context(context, client_ctx))
             return;
     }
-   
+
     if ((HXMLNew == state) && (!more)) {
         // This is the first and last chunk of this response
 
@@ -163,7 +163,7 @@ HttpSendXML(const std::string& context, const u_int8_t * buf, uint32_t len,
             "<__%s_list type=\"slist\">\r\n", client_ctx.c_str());
         SESSION_SEND(buffer_str);
 
-       
+
         // Calculation for Data
         sprintf(length_str, "%x\r\n", len);
         SESSION_SEND(length_str);
@@ -172,10 +172,10 @@ HttpSendXML(const std::string& context, const u_int8_t * buf, uint32_t len,
 
         sprintf(buffer_str,"\r\n");
         SESSION_SEND(buffer_str);
-        
+
     } else if ((HXMLIncomplete == state) && !more) {
         // This is the last chunk of this response
-        
+
         // Calculation for Data
         sprintf(length_str, "%x\r\n", len);
         SESSION_SEND(length_str);
@@ -195,7 +195,7 @@ HttpSendXML(const std::string& context, const u_int8_t * buf, uint32_t len,
         SESSION_SEND(length_str);
     } else if ((HXMLIncomplete == state) && more) {
         // This is a middle chunk of the response
-       
+
         // Calculation for Data
         sprintf(length_str, "%x\r\n", len);
         SESSION_SEND(length_str);
@@ -210,11 +210,11 @@ HttpSendXML(const std::string& context, const u_int8_t * buf, uint32_t len,
         client_ctx = resp_name;
         HttpSession::set_client_context(context,"");
     }
-    
+
 }
 
 // Function for HTTP Server to call when HTTP Client Requests a .sandesh module
-// or it's stylesheet 
+// or it's stylesheet
 //
 // Arguments:
 //   hti : Buffer Ptr and length of HTTP payload to send
@@ -302,7 +302,7 @@ HttpSandeshRequestCallback(HttpServer *hs,
 //   snh : Sandesh Response to send to the HTTP Client (base class)
 //   context: Context that was in the Sandesh Request.
 //            All HTTP Server-originated contexts start with "http%"
-//          
+//
 void
 SandeshHttp::Response(Sandesh *snh, std::string context) {
     bool more = false;
@@ -356,7 +356,7 @@ SandeshHttp::Init(EventManager *evm, const string module,
         return true;
     }
     ostringstream index_ss;
-   
+
     SandeshTraceBufferPtr httpbuf(SandeshTraceBufferCreate("httpbuf", 100));
     SANDESH_TRACE_TEXT_TRACE(httpbuf, "<Initializing httpbuf");
     SANDESH_TRACE_TEXT_TRACE(httpbuf, "Size 100");
@@ -369,19 +369,19 @@ SandeshHttp::Init(EventManager *evm, const string module,
     struct SslConfig sslConfig;
     sslConfig.ssl_enabled = config.introspect_ssl_enable;
     sslConfig.ca_cert = config.ca_cert;
-    sslConfig.certfile = config.certfile;
-    sslConfig.keyfile = config.keyfile;
+    sslConfig.certfile = config.server_certfile;
+    sslConfig.keyfile = config.server_keyfile;
     sslConfig.ssl_insecure = config.introspect_ssl_insecure;
     hServ_ = new HttpServer(evm, sslConfig, dscp);
     httpreqcb = reqcb;
-    index_ss << "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"" << 
+    index_ss << "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"" <<
         " \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">" << endl;
     index_ss << "<html xmlns=\"http://www.w3.org/1999/xhtml\">" << endl;
-    index_ss << "<head>" << 
-        "<link href=\"css/style.css\" rel=\"stylesheet\" type=\"text/css\"/>" << 
+    index_ss << "<head>" <<
+        "<link href=\"css/style.css\" rel=\"stylesheet\" type=\"text/css\"/>" <<
         "<title>" << module << "</title></head><body>" << endl;
     index_ss << "<h1>Modules for " << module << "</h1>" << endl;
-    
+
     for (map_type::iterator it=map_->begin(); it!=map_->end(); it++) {
         std::string regString = "/" + it->first;
         hServ_->RegisterHandler(regString.c_str(),
@@ -436,7 +436,7 @@ SandeshHttp::Init(EventManager *evm, const string module,
     }
 }
 
-// Function to shut down HTTP Server 
+// Function to shut down HTTP Server
 void
 SandeshHttp::Uninit(void) {
     if (!hServ_) return;

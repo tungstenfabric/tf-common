@@ -146,8 +146,8 @@ class SandeshHttp(object):
                     self.set_socket_options(sock)
                 if self._sandesh_config.introspect_ssl_enable:
                     ca_certs = self._sandesh_config.ca_cert
-                    keyfile = self._sandesh_config.keyfile
-                    certfile = self._sandesh_config.certfile
+                    keyfile = self._sandesh_config.server_keyfile
+                    certfile = self._sandesh_config.server_certfile
                     self._http_server = WSGIServer(
                         sock,
                         self._http_app,
