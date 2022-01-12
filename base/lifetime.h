@@ -130,6 +130,7 @@ public:
 
     bool IsDeleted() const { return deleted_; }
     bool HasDependents() const { return !dependents_.empty(); }
+    bool HasRefcount() const { return refcount_; }
 
     const uint64_t create_time_stamp_usecs() const {
         return create_time_stamp_usecs_;
