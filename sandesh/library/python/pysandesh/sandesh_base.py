@@ -397,13 +397,15 @@ class Sandesh(object):
                            enable_syslog=False,
                            syslog_facility=_DEFAULT_SYSLOG_FACILITY,
                            enable_trace_print=False,
-                           enable_flow_log=False):
+                           enable_flow_log=False,
+                           maxBytes=5000000, backupCount=10):
         self._sandesh_logger.set_logging_params(
             enable_local_log=enable_local_log, category=category,
             level=level, file=file, enable_syslog=enable_syslog,
             syslog_facility=syslog_facility,
             enable_trace_print=enable_trace_print,
-            enable_flow_log=enable_flow_log)
+            enable_flow_log=enable_flow_log,
+            maxBytes=maxBytes, backupCount=backupCount)
     # end set_logging_params
 
     def set_trace_print(self, enable_trace_print):
