@@ -135,6 +135,15 @@ static void event_cb(GlobalInfo *g, TcpSessionPtr session, int action,
   if (!session->Connection()) return;
 
   HttpClient *client = session->Connection()->client();
+  // Ignore if httpclient is null when we get this from meta_data args from VM
+  if (!client) {
+    LOG(ERROR,"HttpClient:unable to call ProcessEvent() as HttpClient is NULL" <<
+		    ", session :" << session <<
+		    ", session->Connection(): " << session->Connection() <<
+		    ", HttpClient :" << session->Connection()->client());		    
+    return;
+  }
+
   client->ProcessEvent(boost::bind(&event_cb_impl, g, session, action, error, 
                                    bytes_transferred));
 }
