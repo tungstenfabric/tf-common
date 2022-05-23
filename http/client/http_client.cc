@@ -477,7 +477,9 @@ void HttpClient::RemoveConnection(HttpConnection *connection) {
 }
 
 void HttpClient::ProcessEvent(EnqueuedCb cb) {
-    work_queue_.Enqueue(cb);
+    if(!cb.empty()) {
+       work_queue_.Enqueue(cb);
+    }
 }
 
 void HttpClient::TimerErrorHandler(std::string name, std::string error) {
