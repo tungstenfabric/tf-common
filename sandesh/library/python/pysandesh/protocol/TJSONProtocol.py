@@ -164,7 +164,7 @@ class TJSONProtocol(TProtocolBase):
             self.is_first_element_list_[-1] = False
 
         struct_begin += '{'
-        if(self.current_sandesh_context_[-1] == "SANDESH"):
+        if (self.current_sandesh_context_[-1] == "SANDESH"):
             struct_begin += '\"STAT_TYPE\":'
             struct_begin += '\"' + name + '\"'
             struct_begin += ','
