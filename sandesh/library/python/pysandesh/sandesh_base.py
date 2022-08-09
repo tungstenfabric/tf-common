@@ -1012,7 +1012,7 @@ class SandeshAsync(Sandesh):
         if len(self.__class__.rate_limit_buffer) == \
                 self.__class__.rate_limit_buffer.maxlen:
             # Read the element in buffer and compare with cur_time
-            if(self.__class__.rate_limit_buffer[0] == cur_time):
+            if (self.__class__.rate_limit_buffer[0] == cur_time):
                 # Sender generating more messages/sec than the
                 # buffer_threshold size
                 if self.__class__.do_rate_limit_drop_log:
