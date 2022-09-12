@@ -959,7 +959,16 @@ class SandeshAsync(Sandesh):
         Sandesh.__init__(self)
     # end __init__
 
+    def is_ascii(self, item):
+        if item is None:
+            return True
+        return all(ord(ch) < 128 for ch in item)
+
     def send(self, sandesh=sandesh_global):
+        if self.__class__.__name__ == 'VncApiConfigLog' and \
+                not self.is_ascii(self.api_log.identifier_name):
+            self.api_log.identifier_name = \
+             json.dumps(self.api_log.identifier_name)
         try:
             self.validate()
         except Exception:
@@ -1151,9 +1160,39 @@ class SandeshUVE(Sandesh):
         self._more = False
     # end __init__
 
+    def is_ascii(self, item):
+        if item is None:
+            return True
+        return all(ord(ch) < 128 for ch in item)
+
     def send(self, isseq=False, seqno=0, context='',
              more=False, sandesh=sandesh_global,
              level=SandeshLevel.SYS_NOTICE):
+        if self.__class__.__name__ in [
+         'ContrailConfigTrace', 'UveVirtualNetworkConfigTrace',
+         'VncApiConfigLog', 'UveServiceChain']:
+            if self.__class__.__name__ == 'ContrailConfigTrace' and \
+                    not self.is_ascii(self.data.name):
+                self.data.name = json.dumps(self.data.name)
+            if self.__class__.__name__ == 'UveVirtualNetworkConfigTrace':
+                if not self.is_ascii(self.data.name):
+                    self.data.name = json.dumps(self.data.name)
+                    if self.data.routing_instance_list is not None:
+                        for i in range(0, len(
+                         self.data.routing_instance_list)):
+                            self.data.routing_instance_list[i] = \
+                             json.dumps(self.data.routing_instance_list[i])
+                    if self.data.connected_networks is not None:
+                        for i in range(0, len(self.data.connected_networks)):
+                            self.data.connected_networks[i] = \
+                             json.dumps(self.data.connected_networks[i])
+            if self.__class__.__name__ == 'VncApiConfigLog' and \
+                    not self.is_ascii(self.api_log.identifier_name):
+                self.api_log.identifier_name = \
+                 json.dumps(self.api_log.identifier_name)
+            if self.__class__.__name__ == 'UveServiceChain' and \
+                    not self.is_ascii(self.data.name):
+                self.data.name = json.dumps(self.data.name)
         try:
             self.validate()
         except Exception:
