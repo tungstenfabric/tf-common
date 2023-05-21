@@ -36,7 +36,8 @@ public:
 
     // Bind a listening socket and register it with the event manager.
     virtual bool Initialize(unsigned short port);
-    virtual bool Initialize(unsigned short port, const IpAddress &host_ip);
+    virtual bool Initialize(unsigned short port, const IpAddress &host_ip,
+        int intf_id = -1);
     bool InitializeInternal(boost::asio::ip::tcp::endpoint localaddr);
 
     const std::string ToString() const { return name_; }
@@ -182,6 +183,7 @@ private:
     tbb::atomic<int> refcount_;
     std::string name_;
     bool socket_open_failure_;
+    int intf_id_;
 
     DISALLOW_COPY_AND_ASSIGN(TcpServer);
 };

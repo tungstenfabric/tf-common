@@ -29,7 +29,7 @@ using std::ostringstream;
 using std::string;
 
 TcpServer::TcpServer(EventManager *evm)
-    : evm_(evm), socket_open_failure_(false) {
+    : evm_(evm), socket_open_failure_(false), intf_id_(-1) {
     refcount_ = 0;
     TcpServerManager::AddServer(this);
 }
@@ -57,13 +57,25 @@ void TcpServer::ResetAcceptor() {
 }
 
 bool TcpServer::Initialize(unsigned short port) {
+    intf_id_ = -1; //this initializer is only for IPv4
     tcp::endpoint localaddr(tcp::v4(), port);
     return InitializeInternal(localaddr);
 }
 
-bool TcpServer::Initialize(unsigned short port, const IpAddress &host_ip) {
+bool TcpServer::Initialize(unsigned short port,
+    const IpAddress &host_ip,
+    int intf_id) {
     tcp::endpoint localaddr(host_ip, port);
-    return InitializeInternal(localaddr);
+    tcp::endpoint serv_ep(host_ip, port);
+    intf_id_ = intf_id;
+    if (host_ip.is_v6()) {
+        Ip6Address ipaddr = host_ip.to_v6();
+        if (intf_id_ > 0) {
+            ipaddr.scope_id(this->intf_id_);
+            serv_ep.address(ipaddr);
+        }
+    }
+    return InitializeInternal(serv_ep);
 }
 
 bool TcpServer::InitializeInternal(tcp::endpoint localaddr) {
@@ -74,7 +86,11 @@ bool TcpServer::InitializeInternal(tcp::endpoint localaddr) {
     }
 
     error_code ec;
-    acceptor_->open(tcp::v4(), ec);
+    if (localaddr.address().is_v4())
+        acceptor_->open(tcp::v4(), ec);
+    else
+        acceptor_->open(tcp::v6(), ec);
+
     if (ec) {
         TCP_SERVER_LOG_ERROR(this, TCP_DIR_NA, "TCP open: " << ec.message());
         ResetAcceptor();

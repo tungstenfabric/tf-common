@@ -19,6 +19,7 @@
 #include "io/io_utils.h"
 #include "io/tcp_message_write.h"
 #include "io/tcp_server.h"
+#include "base/address_util.h"
 
 using boost::asio::async_write;
 using boost::asio::buffer;
@@ -229,7 +230,12 @@ void TcpSession::SetName() {
     name_ = out.str();
 
     out.str("");
-    string hostname = ResolveCanonicalName(local.address().to_string());
+    std::string hostname = "";
+    if (local.address().is_v4()) {
+        hostname = ResolveCanonicalName(local.address().to_string());
+    } else {
+        hostname = ResolveCanonicalNameIPv6(local.address().to_string());
+    }
     out << hostname << ":" << remote_.address().to_string();
     uve_key_str_ = out.str();
 }

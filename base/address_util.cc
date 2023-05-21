@@ -82,6 +82,38 @@ std::string ResolveCanonicalName(const std::string& ipv4)
     return boost::asio::ip::host_name();
 }
 
+/* This variant passes all tests
+ * To be covered by more tests later
+ * Returns the  canonical hostname (FQDN) by IPv6 address
+*/
+std::string ResolveCanonicalNameIPv6(const std::string& ipv6)
+{
+    std::string loc_ip = ipv6;
+    if (boost::starts_with(loc_ip, "::1"))
+        return "localhost";
+    unsigned int perc_pos = loc_ip.find("%");
+    if (perc_pos != std::string::npos) {
+        loc_ip = loc_ip.substr(0,perc_pos);
+    }
+    return loc_ip;
+// Next code is incompatible with schema_transformer:
+//    boost::asio::ip::tcp::endpoint endpoint;
+//    boost::asio::io_service io_service;
+//    boost::asio::ip::address_v6 ip =
+//        boost::asio::ip::address_v6::from_string(loc_ip);
+//    endpoint.address(ip);
+//    boost::asio::ip::tcp::resolver resolver(io_service);
+//    boost::asio::ip::tcp::resolver::iterator iter =
+//        resolver.resolve (endpoint), end;
+//    while (iter != end){
+//        if(iter->host_name() != ""){
+//            return iter->host_name();
+//        }
+//        iter++;
+//    }
+//    return boost::asio::ip::host_name();
+}
+
 /*
  * Returns boost::asio::ip::address if given string is either valid
  * IPv4, IPv6 or a resolvable FQDN

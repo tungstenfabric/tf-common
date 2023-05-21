@@ -39,6 +39,11 @@ std::string ResolveCanonicalName();
 
 std::string ResolveCanonicalName(const std::string& ipv4);
 
+/*
+ * Returns canonical  hostname by IPv6
+ */
+
+std::string ResolveCanonicalNameIPv6(const std::string& ipv6);
 
 /*
  * Returns boost::asio::ip::address if given string is either valid

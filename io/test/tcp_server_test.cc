@@ -66,11 +66,15 @@ public:
         Socket *socket = session->socket();
 
         boost::system::error_code err;
-        socket->open(boost::asio::ip::tcp::v4(), err);
+        if(is_ipv4())
+            socket->open(boost::asio::ip::tcp::v4(), err);
+        else
+            socket->open(boost::asio::ip::tcp::v6(), err);
+        
         if (err) {
             TCP_SESSION_LOG_ERROR(session, TCP_DIR_OUT,
                                   "open failed: " << err.message());
-        }   
+        }
         err = session->SetSocketOptions();
         if (err) {
             TCP_SESSION_LOG_ERROR(session, TCP_DIR_OUT,
@@ -80,6 +84,9 @@ public:
     }
 
     EchoSession *GetSession() const { return session_; }
+    bool is_ipv4() {
+        return LocalEndpoint().address().is_v4();
+    }
 
 private:
     EchoSession *session_;
@@ -106,8 +113,12 @@ public:
         } else {
             endpoint.address(address::from_string(server_ip));
         }
+        is_ipv4_ = endpoint.address().is_v4();
         endpoint.port(dst_port_);
-        socket_.open(tcp::v4());
+        if (is_ipv4_)
+            socket_.open(tcp::v4());
+        else
+            socket_.open(tcp::v6());
         socket_.connect(endpoint);
     }
 
@@ -127,6 +138,7 @@ private:
     int dst_port_;
     boost::asio::io_service io_service_;
     tcp::socket socket_;
+    bool is_ipv4_;
 };
 
 class EchoServerTest : public ::testing::Test {
@@ -172,8 +184,19 @@ protected:
         task_util::WaitForIdle();
     }
 
+    void ResetServer() {
+        //Stop an old server
+        task_util::WaitForIdle();
+        server_->Shutdown();
+        TcpServerManager::DeleteServer(server_);
+        server_ = NULL;
 
-    void DummyTimerHandler(TcpSession *session, 
+        //Start a new server
+        server_ = new EchoServer(evm_.get());
+        task_util::WaitForIdle();
+    }
+
+    void DummyTimerHandler(TcpSession *session,
                            const boost::system::error_code &error) {
         if (error) {
             return;
@@ -222,8 +245,47 @@ TEST_F(EchoServerTest, Basic) {
     client.Close();
 }
 
+TEST_F(EchoServerTest, Basic_Ipv) {
+    server_->Initialize(0);
+    task_util::WaitForIdle();
+    thread_->Start();
+    TASK_UTIL_EXPECT_TRUE(server_->is_ipv4());
+
+    ResetServer();
+    server_->Initialize(0,address::from_string("::1"));
+    task_util::WaitForIdle();
+    TASK_UTIL_EXPECT_FALSE(server_->is_ipv4());
+
+    ResetServer();
+    server_->Initialize(0,address::from_string("127.0.0.1"));
+    task_util::WaitForIdle();
+    TASK_UTIL_EXPECT_TRUE(server_->is_ipv4());
+}
+
 TEST_F(EchoServerTest, Basic_InterfaceIp) {
     std::string server_ip = "127.0.0.2";
+    server_->Initialize(0, address::from_string(server_ip));
+    task_util::WaitForIdle();
+    thread_->Start();		// Must be called after initialization
+    int port = server_->GetPort();
+    ASSERT_LT(0, port);
+    TCP_UT_LOG_DEBUG("Server port: " << port);
+    TcpLocalClient client(port);
+    client.Connect(server_ip);
+    const char msg[] = "Test Message";
+    int len = client.Send(msg, sizeof(msg));
+    TASK_UTIL_EXPECT_EQ((int) sizeof(msg), len);
+
+    char data[1024];
+    int rlen = client.Recv(data, sizeof(data));
+    TASK_UTIL_EXPECT_EQ(len, rlen);
+    TASK_UTIL_EXPECT_EQ(0, memcmp(data, msg, rlen));
+
+    client.Close();
+}
+
+TEST_F(EchoServerTest, Basic_InterfaceIpv6) {
+    std::string server_ip = "::1";
     server_->Initialize(0, address::from_string(server_ip));
     task_util::WaitForIdle();
     thread_->Start();		// Must be called after initialization
@@ -306,6 +368,77 @@ TEST_F(EchoServerTest, Connect) {
     TcpServerManager::DeleteServer(client);
     client = NULL;
 }
+
+TEST_F(EchoServerTest, ConnectIpv6) {
+    EchoServer *client = new EchoServer(evm_.get());
+    //allocate a free random port and IPv6 version
+    //of a client (it is IPv4 by default)
+    client->Initialize(0, boost::asio::ip::address_v6());
+
+    task_util::WaitForIdle();
+    std::string server_ip = "::"; //lo address
+    server_->Initialize(0, address::from_string(server_ip), 1);//any_port & ip
+    task_util::WaitForIdle();
+    thread_->Start();		// Must be called after initialization
+
+    //Check that we can't connect when the server ip address is wrong
+    TcpSession *session = client->CreateSession();
+    session->set_observer(boost::bind(&EchoServerTest::OnEvent, this, _1, _2));
+    boost::asio::ip::tcp::endpoint endpoint;
+    boost::system::error_code ec;
+    // According to RFC 5156, sec.2.6 2001:db8::/32 shouldn't route anywhere
+    endpoint.address(address::from_string("2001:db8::1", ec));
+    endpoint.port(server_->GetPort());//(179);
+    client->Connect(session, endpoint);
+    // we don't actually need to wait here
+    StartConnectTimer(session, 0);
+    TASK_UTIL_EXPECT_TRUE(session->IsClosed());
+    TASK_UTIL_EXPECT_FALSE(session->IsEstablished());
+    TASK_UTIL_EXPECT_EQ(0, connect_success_);
+    TASK_UTIL_EXPECT_EQ(0, connect_abort_);
+    TASK_UTIL_EXPECT_EQ(1, connect_fail_);
+    TASK_UTIL_EXPECT_EQ(0, connect_success_);
+    session->Close();
+    client->DeleteSession(session);
+
+    //Check that we can't connect when the server port is wrong
+    connect_success_ = connect_fail_ = connect_abort_ = 0;
+    session = client->CreateSession();
+    session->set_observer(boost::bind(&EchoServerTest::OnEvent, this, _1, _2));
+    endpoint.address(boost::asio::ip::address::from_string(server_ip, ec));
+    endpoint.port(179);
+    client->Connect(session, endpoint);
+    StartConnectTimer(session, 10);
+    TASK_UTIL_EXPECT_TRUE(session->IsClosed());
+    TASK_UTIL_EXPECT_FALSE(session->IsEstablished());
+    TASK_UTIL_EXPECT_EQ(0, connect_abort_);
+    TASK_UTIL_EXPECT_GE(1, connect_fail_);
+    TASK_UTIL_EXPECT_EQ(0, connect_success_);
+    session->Close();
+    client->DeleteSession(session);
+
+    //Check that we connect when the server port and addresss are correct
+    connect_success_ = connect_fail_ = connect_abort_ = 0;
+    session = client->CreateSession();
+    session->set_observer(boost::bind(&EchoServerTest::OnEvent, this, _1, _2));
+    endpoint.address(address::from_string(server_ip));
+    endpoint.port(server_->GetPort());
+    client->Connect(session, endpoint);
+    StartConnectTimer(session, 10);
+    TASK_UTIL_EXPECT_TRUE(session->IsEstablished());
+    TASK_UTIL_EXPECT_FALSE(session->IsClosed());
+    TASK_UTIL_EXPECT_EQ(0, connect_abort_);
+    TASK_UTIL_EXPECT_EQ(0, connect_fail_);
+    TASK_UTIL_EXPECT_EQ(1, connect_success_);
+    session->Close();
+    client->DeleteSession(session);
+
+    client->Shutdown();
+    task_util::WaitForIdle();
+    TcpServerManager::DeleteServer(client);
+    client = NULL;
+}
+
 using boost::asio::mutable_buffer;
 
 class ReaderTest : public TcpMessageReader {
